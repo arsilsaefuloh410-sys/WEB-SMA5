@@ -1,0 +1,17 @@
+# Berkas terunggah besar - hanya struktur folder + .htaccess yang di-commit
+uploads/materi/*.pdf
+uploads/materi/*.ppt
+uploads/materi/*.pptx
+uploads/hero/*.webp
+uploads/hero/*.jpg
+uploads/hero/*.jpeg
+uploads/hero/*.png
+
+# Berkas sistem & IDE
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# Log
+*.log

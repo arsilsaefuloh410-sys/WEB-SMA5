@@ -1,0 +1,7 @@
+# Nonaktifkan eksekusi skrip PHP di folder unggahan demi keamanan
+<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|phps|cgi|pl|exe)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+Options -Indexes -ExecCGI
