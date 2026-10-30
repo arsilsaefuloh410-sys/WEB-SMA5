@@ -66,6 +66,12 @@ body {
     flex-direction: column;
     letter-spacing: -0.01em;
     overflow-x: clip;
+    max-width: 100%;
+}
+
+html {
+    overflow-x: clip;
+    max-width: 100%;
 }
 
 h1, h2, h3, h4, .font-heading {
@@ -223,6 +229,9 @@ body.sidebar-collapsed .app-sidebar {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    max-width: 100%;
+    overflow-x: clip;
+    min-width: 0;
 }
 
 body.sidebar-collapsed .app-main-wrap,
@@ -616,7 +625,7 @@ body:not(.has-sidebar) .app-main-wrap {
 
 /* Hero full-bleed: hampir selebar halaman, sudut membulat aesthetic */
 .hero-wrapper.hero-fullbleed {
-    margin: 0 1rem 2.5rem;
+    margin: 1.25rem 1rem 2.5rem;
     border-radius: 28px;
     border: none;
     box-shadow: 0 22px 50px rgba(15, 32, 56, 0.2);
@@ -1442,4 +1451,287 @@ body:not(.has-sidebar) .app-main-wrap {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     color: #213E6E;
+}
+
+/* ==========================================================
+ * PENYESUAIAN MOBILE / LAYAR KECIL
+ * ========================================================== */
+
+/* Navbar: cegah meluber & rapikan jarak di layar kecil */
+@media (max-width: 991.98px) {
+    .navbar-custom {
+        padding: 0.6rem 0.85rem;
+        overflow-x: clip;
+    }
+
+    .navbar-custom .container-fluid {
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .navbar-brand-main {
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+        gap: 0.5rem !important;
+    }
+
+    .navbar-brand-main > div.d-flex.flex-column {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .navbar-brand-main > div.d-flex.flex-column > span {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sidebar-toggle,
+    .nav-icon-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.15rem;
+    }
+
+    .nav-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.35rem !important;
+        min-width: 0;
+    }
+
+    .nav-actions .btn-pill,
+    .nav-actions .dropdown .btn {
+        padding-left: 0.6rem !important;
+        padding-right: 0.6rem !important;
+    }
+
+    .hero-wrapper.hero-fullbleed {
+        margin: 0.85rem 0.65rem 1.75rem;
+        border-radius: 20px;
+        max-width: 100%;
+    }
+
+    .hero-wrapper.hero-fullbleed .hero-slideshow,
+    .hero-wrapper.hero-fullbleed .hero-overlay {
+        border-radius: 20px;
+    }
+
+    .hero-wrapper.hero-with-photo {
+        min-height: 360px;
+        padding-top: 2.25rem;
+        padding-bottom: 2.25rem;
+    }
+
+    .section-title {
+        font-size: 1.65rem;
+    }
+
+    .feature-box-card {
+        padding: 1.35rem 1.2rem;
+    }
+
+    /* Kartu fitur di mobile: sederhana, tanpa gradien mencolok */
+    .feature-box-card,
+    .feature-box-card.card-primary-gradient {
+        background: var(--bg-surface) !important;
+        color: var(--text-main) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: var(--radius-md) !important;
+        box-shadow: none !important;
+        padding: 1rem 1.1rem !important;
+    }
+
+    .feature-box-card.card-primary-gradient h5,
+    .feature-box-card h5 {
+        color: var(--text-main) !important;
+    }
+
+    .feature-box-card.card-primary-gradient p,
+    .feature-box-card p {
+        color: var(--text-muted) !important;
+    }
+
+    .feature-box-card h5 {
+        font-size: 1rem !important;
+        margin-bottom: 0.35rem !important;
+    }
+
+    /* Ikon: kecil, polos, tanpa kotak tebal */
+    .feature-icon-pill,
+    .feature-icon-pill.icon-on-primary {
+        width: auto !important;
+        height: auto !important;
+        border: none !important;
+        background: transparent !important;
+        color: var(--color-primary) !important;
+        font-size: 1.35rem !important;
+        margin-bottom: 0.5rem !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        justify-content: flex-start !important;
+    }
+
+    .feature-box-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+        border-color: var(--border-subtle) !important;
+    }
+
+    .feature-box-card:hover .feature-icon-pill {
+        transform: none !important;
+    }
+
+    .sidebar-kelas {
+        position: static;
+    }
+}
+
+@media (max-width: 575.98px) {
+    /* Sembunyikan nama panjang di dropdown akun (hanya ikon) */
+    .nav-user-name {
+        display: none !important;
+    }
+
+    .navbar-custom {
+        padding: 0.5rem 0.65rem;
+    }
+
+    .nav-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.35rem !important;
+        min-width: 0;
+    }
+
+    .nav-actions .dropdown .btn {
+        padding: 0.25rem 0.5rem !important;
+        gap: 0.25rem !important;
+    }
+
+    .brand-icon-box {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+    }
+
+    .hero-wrapper {
+        padding: 1.6rem 1.15rem;
+        border-radius: 18px !important;
+    }
+
+    .hero-wrapper.hero-fullbleed {
+        margin: 0.6rem 0.5rem 1.25rem;
+        border-radius: 18px;
+    }
+
+    .hero-wrapper.hero-fullbleed .hero-slideshow,
+    .hero-wrapper.hero-fullbleed .hero-overlay {
+        border-radius: 18px;
+    }
+
+    .hero-wrapper.hero-with-photo {
+        min-height: 300px;
+        padding-top: 1.75rem;
+        padding-bottom: 1.75rem;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+        margin-top: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .welcome-school-name {
+        font-size: 1.05rem;
+        letter-spacing: 0.03em;
+    }
+
+    .welcome-school-city {
+        font-size: 0.68rem;
+        letter-spacing: 0.22em;
+    }
+
+    /* Tombol hero: lebar penuh agar mudah ditekan */
+    .hero-wrapper .btn-pill {
+        width: 100%;
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+    }
+
+    .section-eyebrow {
+        font-size: 0.74rem;
+    }
+
+    /* Form pencarian: input dan tombol ditumpuk agar tidak meluber */
+    .input-group-pill {
+        flex-wrap: wrap;
+        border-radius: var(--radius-lg) !important;
+    }
+
+    .input-group-pill .input-group-text {
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
+    }
+
+    .input-group-pill .form-control {
+        border: 1px solid var(--border-subtle) !important;
+        border-left: none !important;
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0 !important;
+        font-size: 0.92rem;
+    }
+
+    .input-group-pill .btn {
+        width: 100%;
+        margin-top: 0.6rem;
+        border-radius: var(--radius-pill) !important;
+    }
+
+    .feature-icon-pill {
+        width: 44px;
+        height: 44px;
+        font-size: 1.25rem;
+        margin-bottom: 0.9rem;
+    }
+
+    .footer-custom {
+        padding: 2.5rem 0 1.5rem;
+        margin-top: 2.5rem;
+    }
+
+    .footer-custom .row {
+        text-align: left;
+    }
+
+    .card-modern .card-body {
+        padding: 1.15rem;
+    }
+}
+
+/* Sangat kecil (≤380px): brand text diringkas */
+@media (max-width: 380px) {
+    .navbar-brand-main > div.d-flex.flex-column > span {
+        font-size: 0.85rem !important;
+    }
+
+    .sidebar-toggle,
+    .nav-icon-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .nav-actions {
+        gap: 0.25rem !important;
+    }
 }

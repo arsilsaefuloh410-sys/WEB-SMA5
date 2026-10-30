@@ -343,3 +343,111 @@ function get_elemen_info($kode) {
     ];
 }
 
+/**
+ * Batas percobaan login gagal & durasi kunci (lockout) anti brute-force
+ */
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MINUTES = 15;
+
+/**
+ * Memvalidasi kekuatan kata sandi (minimal 8 karakter + huruf + angka)
+ * @return array [valid => bool, message => string]
+ */
+function validate_password_strength(string $password): array {
+    if (strlen($password) < 8) {
+        return ['valid' => false, 'message' => 'Kata sandi minimal 8 karakter demi keamanan akun.'];
+    }
+    if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+        return ['valid' => false, 'message' => 'Kata sandi harus mengandung minimal satu huruf dan satu angka.'];
+    }
+    if (in_array(strtolower($password), ['12345678', 'password', 'qwerty123', 'admin123', 'guru123'], true)) {
+        return ['valid' => false, 'message' => 'Kata sandi terlalu umum dan mudah ditebak. Gunakan kata sandi lain.'];
+    }
+    return ['valid' => true, 'message' => ''];
+}
+
+/**
+ * Mendapatkan alamat IP klien (untuk pembatasan percobaan login)
+ */
+function get_client_ip(): string {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    return substr($ip, 0, 45);
+}
+
+/**
+ * Mengecek apakah email/IP sedang dikunci akibat terlalu banyak percobaan login gagal.
+ * @return int Sisa detik kunci (0 = tidak dikunci)
+ */
+function get_login_lockout_seconds(PDO $pdo, string $email): int {
+    $ip = get_client_ip();
+    $since = date('Y-m-d H:i:s', time() - LOGIN_LOCKOUT_MINUTES * 60);
+    try {
+        $stmt = $pdo->prepare("SELECT MIN(attempted_at) FROM login_attempts WHERE attempted_at > ? AND (email = ? OR ip_address = ?)");
+        $stmt->execute([$since, strtolower($email), $ip]);
+        $oldest = $stmt->fetchColumn();
+        if (!$oldest) return 0;
+        $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE attempted_at > ? AND (email = ? OR ip_address = ?)");
+        $stmtCount->execute([$since, strtolower($email), $ip]);
+        if ((int)$stmtCount->fetchColumn() < LOGIN_MAX_ATTEMPTS) return 0;
+        $unlock_at = strtotime((string)$oldest) + LOGIN_LOCKOUT_MINUTES * 60;
+        return max(1, $unlock_at - time());
+    } catch (Exception $e) {
+        return 0; // Tabel belum dibuat (migrasi belum dijalankan)
+    }
+}
+
+/**
+ * Mencatat satu percobaan login gagal
+ */
+function record_login_attempt(PDO $pdo, string $email): void {
+    try {
+        $stmt = $pdo->prepare("INSERT INTO login_attempts (email, ip_address, attempted_at) VALUES (?, ?, ?)");
+        $stmt->execute([strtolower($email), get_client_ip(), date('Y-m-d H:i:s')]);
+    } catch (Exception $e) {
+        // Tabel belum dibuat — lewati agar login tidak rusak
+    }
+}
+
+/**
+ * Menghapus catatan percobaan gagal (setelah login berhasil)
+ */
+function clear_login_attempts(PDO $pdo, string $email): void {
+    try {
+        $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = ?");
+        $stmt->execute([strtolower($email)]);
+    } catch (Exception $e) {
+        // Abaikan bila tabel belum ada
+    }
+}
+
+/**
+ * Memeriksa apakah alamat email berasal dari layanan email sekali pakai
+ * (temporary / disposable email) yang sering dipakai untuk mendaftar
+ * secara asal-asalan. Daftar domain dilengkapi seperlunya.
+ */
+function is_disposable_email($email) {
+    $email = strtolower(trim((string)$email));
+    $at = strrpos($email, '@');
+    if ($at === false) {
+        return true; // tanpa @ dianggap tidak valid
+    }
+    $domain = substr($email, $at + 1);
+
+    $blocklist = [
+        'mailinator.com', 'tempmail.com', 'temp-mail.org', 'temp-mail.io',
+        '10minutemail.com', '10minutemail.net', 'guerrillamail.com',
+        'guerrillamailblock.com', 'grr.la', 'yopmail.com', 'yopmail.fr',
+        'trashmail.com', 'trashmail.net', 'trashmail.de', 'sharklasers.com',
+        'getnada.com', 'maildrop.cc', 'discard.email', 'discardmail.com',
+        'fakeinbox.com', 'throwawaymail.com', 'mailnesia.com', 'tempail.com',
+        'tempr.email', 'dispostable.com', 'mailcatch.com', 'mytemp.email',
+        'moakt.com', 'moakt.cc', 'emailondeck.com', '33mail.com',
+        'mailsac.com', 'spam4.me', 'bccto.me', 'chacuo.net', 'linshiyouxiang.net',
+        '20minutemail.com', 'mohmal.com', 'kurzepost.de', 'etempmail.com',
+        'tempmailo.com', 'mailforspam.com', 'spambox.us', 'trashymail.com',
+        'harakirimail.com', 'tmail.ws', 'tmpmail.net', 'tmpmail.org',
+    ];
+
+    return in_array($domain, $blocklist, true);
+}
+

@@ -12,6 +12,9 @@ USE `db_bahan_ajar_informatika`;
 -- 1. TABEL PENGGUNA (users)
 -- Menyimpan akun Admin (koordinator materi) dan Guru
 -- --------------------------------------------------------
+DROP TABLE IF EXISTS `login_attempts`;
+DROP TABLE IF EXISTS `password_resets`;
+DROP TABLE IF EXISTS `registration_verifications`;
 DROP TABLE IF EXISTS `file_materi`;
 DROP TABLE IF EXISTS `referensi`;
 DROP TABLE IF EXISTS `topik`;
@@ -26,6 +29,55 @@ CREATE TABLE `users` (
   `role` ENUM('admin','guru') NOT NULL DEFAULT 'guru',
   `status` ENUM('aktif','pending') NOT NULL DEFAULT 'aktif',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- 1b. TABEL RESET KATA SANDI (password_resets)
+-- Menyimpan token reset kata sandi yang dikirim via email.
+-- token_hash: SHA-256 dari token asli (token asli hanya dikirim lewat email).
+-- Berlaku 60 menit sejak dibuat.
+-- --------------------------------------------------------
+CREATE TABLE `password_resets` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(100) NOT NULL,
+  `token_hash` CHAR(64) NOT NULL,
+  `expires_at` DATETIME NOT NULL,
+  `used` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_resets_email_token` (`email`, `token_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- 1c. TABEL VERIFIKASI PENDAFTARAN (registration_verifications)
+-- Menyimpan data pendaftar guru yang sudah mengisi formulir
+-- tetapi belum membuka tautan verifikasi dari emailnya.
+-- Akun users baru dibuat setelah token verifikasi dikonsumsi,
+-- dengan status 'pending' menunggu persetujuan administrator.
+-- --------------------------------------------------------
+CREATE TABLE `registration_verifications` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `nama` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL UNIQUE,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `token_hash` CHAR(64) NOT NULL,
+  `expires_at` DATETIME NOT NULL,
+  `used` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_regver_email_token` (`email`, `token_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- 1d. TABEL PERCOBAAN LOGIN (login_attempts)
+-- Mencatat percobaan login gagal per email/IP untuk pembatasan
+-- brute-force: kunci sementara 15 menit setelah 5 kali gagal.
+-- --------------------------------------------------------
+CREATE TABLE `login_attempts` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(100) NOT NULL,
+  `ip_address` VARCHAR(45) NOT NULL,
+  `attempted_at` DATETIME NOT NULL,
+  KEY `idx_attempts_email_time` (`email`, `attempted_at`),
+  KEY `idx_attempts_ip_time` (`ip_address`, `attempted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

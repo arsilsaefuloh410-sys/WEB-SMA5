@@ -23,16 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'add') {
         $nama = trim($_POST['nama'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '123456';
+        $password = $_POST['password'] ?? '';
         $role = ($_POST['role'] === 'admin') ? 'admin' : 'guru';
         $status = ($_POST['status'] === 'pending') ? 'pending' : 'aktif';
 
         if (empty($nama) || empty($email) || empty($password)) {
-            set_flash('danger', 'Mohon lengkapi semua kolom yang wajib diisi.');
+            set_flash('danger', 'Mohon lengkapi semua kolom yang wajib diisi, termasuk kata sandi awal.');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             set_flash('danger', 'Format alamat email tidak valid.');
-        } elseif (strlen($password) < 6) {
-            set_flash('danger', 'Kata sandi minimal 6 karakter demi keamanan.');
+        } elseif (!validate_password_strength($password)['valid']) {
+            set_flash('danger', e(validate_password_strength($password)['message']));
         } else {
             // Cek duplikasi email
             $stmtCek = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
@@ -125,17 +125,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user_id = (int)($_POST['user_id'] ?? 0);
         $new_pass = trim($_POST['new_password'] ?? '');
 
-        if (empty($new_pass)) {
-            $new_pass = '123456';
-        }
-
-        if (strlen($new_pass) < 6) {
-            set_flash('danger', 'Kata sandi baru minimal 6 karakter.');
+        $strength = validate_password_strength($new_pass);
+        if (!$strength['valid']) {
+            set_flash('danger', e($strength['message']));
         } else {
             $newHash = password_hash($new_pass, PASSWORD_BCRYPT);
             $stmtReset = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
             $stmtReset->execute([$newHash, $user_id]);
-            set_flash('info', 'Kata sandi berhasil di-reset menjadi: <code>' . e($new_pass) . '</code>.');
+            // Catatan: setelah reset, semua percobaan login gagal untuk akun ini dihapus
+            $stmtEmail = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+            $stmtEmail->execute([$user_id]);
+            $reset_email = $stmtEmail->fetchColumn();
+            if ($reset_email) {
+                clear_login_attempts($pdo, $reset_email);
+            }
+            set_flash('success', 'Kata sandi berhasil di-reset. Beritahukan kata sandi baru tersebut kepada pemilik akun secara langsung.');
         }
 
         header('Location: ' . base_url('admin/users.php'));
@@ -220,7 +224,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <i class="bi bi-person-exclamation fs-4 text-warning-emphasis"></i>
             <div>
                 <strong class="text-dark">Terdapat <?= $totalPending ?> akun menunggu persetujuan / nonaktif!</strong>
-                <div class="small text-muted">Akun guru atau pengguna baru memerlukan verifikasi/aktivasi agar dapat masuk ke sistem.</div>
+                <div class="small text-muted">Akun guru dari pendaftaran mandiri (email sudah diverifikasi) maupun akun yang dinonaktifkan menunggu aktivasi Anda agar dapat masuk ke sistem.</div>
             </div>
         </div>
         <a href="<?= base_url('admin/users.php?filter=pending') ?>" class="btn btn-warning btn-sm fw-semibold text-nowrap">
@@ -509,9 +513,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                         </div>
                                         <div class="modal-body">
                                             <label class="form-label small fw-semibold">Kata Sandi Baru</label>
-                                            <input type="text" name="new_password" class="form-control" value="123456" minlength="6" placeholder="Minimal 6 karakter" required>
+                                            <input type="password" name="new_password" class="form-control" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Minimal 8 karakter + huruf & angka" required>
                                             <small class="text-muted d-block mt-2" style="font-size: 0.78rem;">
-                                                Standar reset default: <code>123456</code> (minimal 6 karakter)
+                                                Kata sandi wajib minimal 8 karakter dan mengandung huruf serta angka.
                                             </small>
                                         </div>
                                         <div class="modal-footer">
@@ -557,8 +561,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Kata Sandi Awal</label>
-                        <input type="text" name="password" class="form-control" value="123456" minlength="6" required>
-                        <small class="text-muted" style="font-size: 0.78rem;">Kata sandi awal standar: <code>123456</code> (minimal 6 karakter, dapat diganti).</small>
+                        <input type="password" name="password" class="form-control" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Minimal 8 karakter + huruf & angka" required>
+                        <small class="text-muted" style="font-size: 0.78rem;">Kata sandi awal wajib minimal 8 karakter dengan huruf & angka, nanti dapat diganti sendiri oleh pengguna.</small>
                     </div>
 
                     <div class="mb-3">

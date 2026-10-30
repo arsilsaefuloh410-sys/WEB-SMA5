@@ -99,7 +99,7 @@ require_once __DIR__ . '/../includes/header.php';
                 
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
                     <div>
-                        <p class="text-muted small mb-4" style="line-height: 1.6;">
+                        <p class="text-muted small mb-4" style="line-height: 1.6; min-height: 3.6em;">
                             <?= e($kls['deskripsi'] ?? 'Materi bahan ajar yang terstruktur dan siap digunakan.') ?>
                         </p>
 

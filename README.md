@@ -35,6 +35,8 @@ Aplikasi telah dilengkapi akun percobaan siap pakai:
 | **Guru Pengajar** | `guru@sma5.sch.id` | `guru123` | Menjelajahi materi, mengunduh berkas, membuka tautan referensi |
 
 > *Catatan: Pada halaman login tersedia tombol klik otomatis untuk mengisi akun demo di atas tanpa perlu mengetik manual.*
+>
+> ⚠️ **Penting untuk deployment produksi:** segera ganti kata sandi akun demo di atas melalui menu **Kelola Akun Pengguna** (admin), atau reset langsung di database. Jangan biarkan kredensial default tetap aktif di lingkungan publik.
 
 ---
 
@@ -127,6 +129,9 @@ Jika Anda ingin menjalankan aplikasi secara langsung dari folder ini:
 
 ## 🛡️ Keamanan & Kualitas Kode
 - **Prepared Statements (PDO)** pada seluruh kueri basis data untuk mencegah celah *SQL Injection*.
-- **Password Hashing** menggunakan algoritma `PASSWORD_BCRYPT` bawaan PHP.
+- **Password Hashing** menggunakan algoritma `PASSWORD_BCRYPT` bawaan PHP (diverifikasi dengan `password_verify()`).
+- **Kebijakan Kata Sandi Kuat**: minimal 8 karakter, wajib mengandung huruf & angka, ditolak bila termasuk kata sandi umum.
+- **Anti Brute-Force**: percobaan login gagal dicatat di tabel `login_attempts`; setelah 5 kali gagal, email/IP dikunci sementara 15 menit.
+- **Regenerasi Sesi** (`session_regenerate_id`) setelah login berhasil untuk mencegah sesi fixation.
 - **Validasi Ketat Berkas**: Memeriksa format ekstensi (`pdf`, `ppt`, `pptx`), memeriksa batas maksimal 20 MB, men-sanitasi nama berkas, dan memblokir eksekusi skrip di folder `uploads`.
 - **Sanitasi Output**: Seluruh teks dinamis difilter menggunakan `htmlspecialchars()` untuk mencegah *Cross-Site Scripting (XSS)*.

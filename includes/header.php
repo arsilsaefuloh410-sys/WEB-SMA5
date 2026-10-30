@@ -114,7 +114,9 @@ function render_nav_menu(string $suffix): void
     <!-- Sidebar Permanen di Kiri (Tersembunyi Secara Default) -->
     <aside class="app-sidebar">
         <a class="side-brand" href="<?= base_url('index.php') ?>">
-            <div class="side-brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
+            <div class="side-brand-icon" style="background:#ffffff;">
+                <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
+            </div>
             <div class="min-width-0">
                 <span class="side-brand-title">Portal Informatika</span>
                 <small class="side-brand-sub">SMAN 5 Kota Ternate</small>
@@ -174,19 +176,19 @@ function render_nav_menu(string $suffix): void
             <?php endif; ?>
 
             <a class="navbar-brand navbar-brand-main d-flex align-items-center gap-2 me-lg-4 text-decoration-none" href="<?= base_url('index.php') ?>">
-                <div class="brand-icon-box flex-shrink-0">
-                    <i class="bi bi-mortarboard-fill"></i>
+                <div class="brand-icon-box flex-shrink-0" style="background:#ffffff;">
+                    <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
                 </div>
-                <div class="d-flex flex-column lh-1">
-                    <span class="fs-6 fw-bold text-dark text-nowrap">Portal Informatika</span>
-                    <small class="fw-semibold text-nowrap mt-1" style="font-size: 0.75rem; color: var(--color-primary);">
+                <div class="d-flex flex-column lh-1 min-width-0">
+                    <span class="fs-6 fw-bold text-dark text-nowrap" style="font-size: 0.95rem;">Portal Informatika</span>
+                    <small class="fw-semibold text-nowrap mt-1 d-none d-sm-block" style="font-size: 0.72rem; color: var(--color-primary);">
                         <i class="bi bi-geo-alt-fill me-1" style="color: var(--color-accent);"></i>SMAN 5 Kota Ternate
                     </small>
                 </div>
             </a>
 
             <!-- Tombol Masuk / Status Akun Pengguna -->
-            <div class="d-flex align-items-center gap-2 flex-nowrap ms-auto">
+            <div class="nav-actions d-flex align-items-center gap-2 ms-auto">
                     <!-- Tombol Mode Gelap / Terang -->
                     <button class="nav-icon-btn theme-toggle" type="button" aria-label="Aktifkan mode gelap" title="Mode Gelap / Terang">
                         <i class="bi bi-moon-stars"></i>
@@ -198,8 +200,8 @@ function render_nav_menu(string $suffix): void
                         </a>
 
                         <?php if (is_admin()): ?>
-                            <a href="<?= base_url('admin/index.php') ?>" class="btn-pill btn-pill-outline btn-sm py-1 px-3 text-nowrap text-decoration-none">
-                                <i class="bi bi-shield-lock"></i> Panel Admin
+                            <a href="<?= base_url('admin/index.php') ?>" class="btn-pill btn-pill-outline btn-sm py-1 px-2 px-sm-3 text-nowrap text-decoration-none" title="Panel Admin">
+                                <i class="bi bi-shield-lock"></i><span class="d-none d-sm-inline"> Panel Admin</span>
                             </a>
                         <?php endif; ?>
 
@@ -208,7 +210,7 @@ function render_nav_menu(string $suffix): void
                                 <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px; height:28px; background-color: var(--color-accent-soft); color: var(--color-primary);">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
-                                <span class="fw-semibold text-dark text-truncate" style="max-width: 150px;"><?= e($current_user['nama']) ?></span>
+                                <span class="fw-semibold text-dark text-truncate nav-user-name" style="max-width: 150px;"><?= e($current_user['nama']) ?></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: 12px; border: 1px solid var(--border-subtle);">
                                 <li class="px-3 py-2 border-bottom">

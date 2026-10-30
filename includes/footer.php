@@ -9,8 +9,8 @@
             <div class="row gy-4">
                 <div class="col-lg-5 col-md-6">
                     <div class="d-flex align-items-center gap-2 mb-3">
-                        <div class="brand-icon-box" style="width: 38px; height: 38px; background: rgba(255,255,255,0.15); border: 1px solid rgba(175,203,233,0.3); color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 1.1rem;">
-                            <i class="bi bi-mortarboard-fill"></i>
+                        <div class="brand-icon-box" style="width: 38px; height: 38px; background:#ffffff; border: 1px solid rgba(175,203,233,0.3); display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                            <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;padding:3px;box-sizing:border-box;">
                         </div>
                         <h5 class="fw-bold mb-0 text-white"><?= APP_NAME ?></h5>
                     </div>

@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_admin();
 
 $active_admin_menu = 'hero';
-$page_title = 'Foto Hero Beranda';
+$page_title = 'Kelola Foto Beranda';
 
 define('HERO_UPLOAD_DIR', __DIR__ . '/../uploads/hero/');
 define('HERO_UPLOAD_URL_REL', 'uploads/hero/');
@@ -164,7 +164,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-3 border-bottom">
     <div>
-        <h3 class="fw-bold text-dark mb-0">Foto Hero Beranda</h3>
+        <h3 class="fw-bold text-dark mb-0">Kelola Foto Beranda</h3>
         <p class="text-muted small mb-0">Unggah maksimal 3 foto. Atur urutan tampil dengan tombol <strong>Naik</strong>/<strong>Turun</strong>. Foto akan bergantian tampil dengan animasi fade di halaman beranda.</p>
     </div>
     <a href="<?= base_url('index.php') ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">

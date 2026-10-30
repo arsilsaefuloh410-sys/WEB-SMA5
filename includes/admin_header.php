@@ -60,12 +60,12 @@ $current_user = current_user();
     <header class="navbar navbar-expand-lg sticky-top px-3 py-2 shadow-sm" style="background-color: var(--color-primary); border-bottom: 1px solid rgba(177, 187, 200, 0.2);">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center gap-2 text-white" href="<?= base_url('admin/index.php') ?>">
-                <div class="brand-icon-box" style="width:36px; height:36px; background: rgba(255,255,255,0.15); border: 1px solid rgba(175,203,233,0.3); font-size: 1.1rem;">
-                    <i class="bi bi-shield-lock-fill" style="color: var(--color-accent);"></i>
+                <div class="brand-icon-box" style="width:36px; height:36px; background:#ffffff; border: 1px solid rgba(175,203,233,0.3);">
+                    <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;padding:2px;box-sizing:border-box;">
                 </div>
-                <div class="d-flex flex-column">
-                    <span class="fs-6 fw-bold lh-1 text-white">Admin Bahan Ajar</span>
-                    <small style="color: var(--color-accent); font-size: 0.72rem;">Pengelola Konten Informatika • <?= APP_SCHOOL ?></small>
+                <div class="d-flex flex-column min-width-0">
+                    <span class="fs-6 fw-bold lh-1 text-white" style="font-size: 0.95rem;">Admin Bahan Ajar</span>
+                    <small class="d-none d-sm-block" style="color: var(--color-accent); font-size: 0.72rem;">Pengelola Konten Informatika • <?= APP_SCHOOL ?></small>
                 </div>
             </a>
 
@@ -80,9 +80,9 @@ $current_user = current_user();
                 </a>
 
                 <div class="dropdown">
-                    <button class="btn btn-sm dropdown-toggle d-flex align-items-center gap-2 px-3 py-1 rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(175,203,233,0.3);">
+                    <button class="btn btn-sm dropdown-toggle d-flex align-items-center gap-2 px-2 px-sm-3 py-1 rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(175,203,233,0.3);">
                         <i class="bi bi-person-circle fs-6" style="color: var(--color-accent);"></i>
-                        <span class="text-white"><?= e($current_user['nama']) ?></span>
+                        <span class="text-white nav-user-name"><?= e($current_user['nama']) ?></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: 12px; border: 1px solid var(--border-subtle);">
                         <li class="px-3 py-2 border-bottom">
@@ -125,12 +125,12 @@ $current_user = current_user();
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?= (isset($active_admin_menu) && $active_admin_menu === 'hero') ? 'active' : '' ?>" href="<?= base_url('admin/hero.php') ?>">
-                                <i class="bi bi-images"></i> Foto Hero
+                                <i class="bi bi-images"></i> Kelola Foto Beranda
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?= (isset($active_admin_menu) && $active_admin_menu === 'users') ? 'active' : '' ?>" href="<?= base_url('admin/users.php') ?>">
-                                <i class="bi bi-people"></i> Akun Pengguna
+                                <i class="bi bi-people"></i> Kelola Akun Pengguna
                                 <?php
                                 $total_usr = 0;
                                 try {

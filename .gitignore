@@ -1,3 +1,6 @@
+# Konfigurasi rahasia - hanya .env.example yang di-commit
+.env
+
 # Berkas terunggah besar - hanya struktur folder + .htaccess yang di-commit
 uploads/materi/*.pdf
 uploads/materi/*.ppt

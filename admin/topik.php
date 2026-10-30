@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_admin();
 
 $active_admin_menu = 'topik';
-$page_title = 'Kelola Bab & Topik Pembelajaran';
+$page_title = 'Kelola Topik & Materi';
 
 // Handle POST Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -121,7 +121,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-3 border-bottom">
     <div>
-        <h3 class="fw-bold text-dark mb-0">Kelola Bab & Topik Pembelajaran</h3>
+        <h3 class="fw-bold text-dark mb-0">Kelola Topik & Materi</h3>
         <p class="text-muted small mb-0">Kelola materi ajar Informatika, berkas modul/slide, dan link referensi</p>
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
