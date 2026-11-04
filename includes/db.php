@@ -45,7 +45,7 @@ try {
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <style>
             body { background: #D9D9D8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-            .error-card { max-width: 680px; margin: 60px auto; border-radius: 16px; border: none; border-top: 4px solid #2A4D88; box-shadow: 0 10px 30px rgba(42, 77, 136, 0.12); }
+            .error-card { max-width: 680px; margin: 60px auto; border-radius: var(--radius-lg); border: none; border-top: 4px solid #2A4D88; box-shadow: none; }
         </style>
     </head>
     <body>

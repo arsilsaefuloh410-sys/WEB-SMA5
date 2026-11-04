@@ -122,17 +122,12 @@ $page_title = 'Verifikasi Email Pendaftaran';
 
     <!-- Panel Kiri: Sambutan -->
     <aside class="login-welcome">
-        <span class="login-orb orb-1"></span>
-        <span class="login-orb orb-2"></span>
-        <span class="login-orb orb-3"></span>
-        <span class="login-orb orb-4"></span>
-
         <div class="login-welcome-content">
             <div class="login-logo">
                 <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5">
             </div>
-            <h1>WELCOME</h1>
-            <h2>Portal Bahan Ajar Informatika</h2>
+            <h1>Portal Bahan Ajar Informatika</h1>
+            <p>Modul, slide, dan referensi untuk guru Informatika SMA Negeri 5 Kota Ternate.</p>
         </div>
     </aside>
 
@@ -140,7 +135,7 @@ $page_title = 'Verifikasi Email Pendaftaran';
     <main class="login-panel">
         <div class="login-form-wrap">
 
-            <h3 class="login-heading">Verifikasi Email</h3>
+            <h2 class="login-heading">Verifikasi Email</h2>
             <p class="login-sub">Konfirmasi kepemilikan email untuk menyelesaikan pendaftaran</p>
 
             <?php if (!empty($error_message)): ?>
@@ -165,7 +160,7 @@ $page_title = 'Verifikasi Email Pendaftaran';
                     <div class="small">
                         Anda akan mendaftarkan akun guru dengan:<br>
                         <strong><?= e($reg_nama) ?></strong><br>
-                        <span class="font-monospace"><?= e($reg_email) ?></span>
+                        <strong><?= e($reg_email) ?></strong>
                     </div>
                 </div>
 

@@ -17,6 +17,9 @@ if (!preg_match('~/auth/~', $current_script) && !preg_match('~/index\.php$~', $c
 // Penanda halaman login (untuk menyembunyikan navigasi saat tamu belum login)
 $on_login_page = (bool) preg_match('~/auth/login\.php$~', $current_script);
 
+// Penanda halaman beranda (gaya editorial: shell tanpa padding, margin diatur halaman)
+$on_landing = (bool) preg_match('~/index\.php$~', $current_script);
+
 $page_title = isset($page_title) ? $page_title . ' - ' . APP_NAME : APP_NAME;
 $current_user = current_user();
 
@@ -116,9 +119,9 @@ function render_nav_menu(string $suffix): void
     </script>
 
     <!-- Penanda JavaScript aktif (agar animasi reveal tidak menyembunyikan konten jika JS gagal) -->
-    <script>document.documentElement.classList.add('js-anim');</script>
+    <script>document.documentElement.classList.add('js-anim', 'js-tabs');</script>
 </head>
-<body class="<?= is_logged_in() ? 'has-sidebar sidebar-collapsed' : '' ?>">
+<body class="<?= is_logged_in() ? 'has-sidebar sidebar-collapsed' : '' ?><?= $on_landing ? ' landing' : '' ?>">
 
     <?php if (is_logged_in()): ?>
     <!-- Sidebar Permanen di Kiri (Tersembunyi Secara Default) -->
@@ -133,7 +136,6 @@ function render_nav_menu(string $suffix): void
             </div>
         </a>
 
-        <div class="side-label">Navigasi Utama</div>
         <?php render_nav_menu('s'); ?>
 
         <?php if ($current_user): ?>
@@ -157,24 +159,6 @@ function render_nav_menu(string $suffix): void
     <!-- Area Konten di Kanan Sidebar -->
     <div class="app-main-wrap">
 
-    <!-- Top Info Bar (Gaya Referensi Layanan) -->
-    <div class="top-info-bar d-none d-md-block">
-        <div class="container-fluid px-xl-5 px-lg-4 px-3 d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-nowrap"><i class="bi bi-geo-alt-fill me-1" style="color: var(--color-accent);"></i> <?= APP_SCHOOL ?> • Portal Bahan Ajar</span>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <a href="mailto:info@sma5.sch.id" class="text-nowrap"><i class="bi bi-envelope-fill me-1"></i> mgmp@sma5.sch.id</a>
-                <span class="opacity-50">|</span>
-                <?php if (is_logged_in()): ?>
-                    <span class="text-white text-nowrap"><i class="bi bi-person-check-fill me-1" style="color: var(--color-accent);"></i> <?= e($current_user['nama']) ?></span>
-                <?php else: ?>
-                    <a href="<?= base_url('auth/login.php') ?>" class="text-nowrap"><i class="bi bi-key-fill me-1"></i> Masuk Akun</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-
     <!-- Navigasi Utama -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container-fluid px-xl-5 px-lg-4 px-3">
@@ -191,7 +175,7 @@ function render_nav_menu(string $suffix): void
                 </div>
                 <div class="d-flex flex-column lh-1 min-width-0">
                     <span class="fs-6 fw-bold text-dark text-nowrap" style="font-size: 0.95rem;">Portal Informatika</span>
-                    <small class="fw-semibold text-nowrap mt-1 d-none d-sm-block" style="font-size: 0.72rem; color: var(--color-primary);">
+                    <small class="fw-semibold text-nowrap mt-1 d-none d-sm-block" style="font-size: 0.8125rem; color: var(--color-primary);">
                         <i class="bi bi-geo-alt-fill me-1" style="color: var(--color-accent);"></i>SMAN 5 Kota Ternate
                     </small>
                 </div>
@@ -222,7 +206,7 @@ function render_nav_menu(string $suffix): void
                                 </div>
                                 <span class="fw-semibold text-dark text-truncate nav-user-name" style="max-width: 150px;"><?= e($current_user['nama']) ?></span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: 12px; border: 1px solid var(--border-subtle);">
+                            <ul class="dropdown-menu dropdown-menu-end" data-ui style="border-radius: var(--radius-md); border: 1px solid var(--border-subtle); box-shadow: 0 12px 32px rgba(14, 29, 46, 0.16);">
                                 <li class="px-3 py-2 border-bottom">
                                     <p class="mb-0 fw-bold text-dark"><?= e($current_user['nama']) ?></p>
                                     <small class="text-muted"><?= e($current_user['email']) ?></small>
@@ -239,7 +223,6 @@ function render_nav_menu(string $suffix): void
                                 <?php else: ?>
                                     <li><a class="dropdown-item py-2" href="<?= base_url('guru/index.php') ?>"><i class="bi bi-collection me-2 text-primary"></i> Katalog Bahan Ajar</a></li>
                                 <?php endif; ?>
-                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item py-2 text-danger" href="<?= base_url('auth/logout.php') ?>"><i class="bi bi-box-arrow-right me-2"></i> Keluar (Logout)</a></li>
                             </ul>
                         </div>

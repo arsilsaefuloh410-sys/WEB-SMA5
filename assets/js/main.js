@@ -156,6 +156,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Tab jenjang kelas di beranda (semua panel tetap terlihat tanpa JS)
+    const tabButtons = document.querySelectorAll('.ed-tab[data-tab]');
+    if (tabButtons.length) {
+        tabButtons.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                const tingkat = this.getAttribute('data-tab');
+                document.querySelectorAll('.ed-tab[data-tab]').forEach(function (b) {
+                    const active = b === tab;
+                    b.classList.toggle('is-active', active);
+                    b.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+                document.querySelectorAll('.ed-panel').forEach(function (panel) {
+                    panel.classList.toggle('is-active', panel.id === 'panel-' + tingkat);
+                });
+            });
+        });
+    }
+
+    // Pengguna meminta gerakan minimal: hentikan video yang sedang berjalan
+    if (REDUCE_MOTION) {
+        document.querySelectorAll('video').forEach(function (v) {
+            try { v.pause(); v.removeAttribute('autoplay'); } catch (e) {}
+        });
+    }
+
     initRevealAnimations();
     initCountUpAnimations();
 });

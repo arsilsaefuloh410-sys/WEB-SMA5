@@ -36,9 +36,6 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card card-modern p-4 mb-4 bg-white anim-reveal" style="border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
         <div class="row align-items-center gy-3">
             <div class="col-md-7">
-                <div class="section-eyebrow mb-2">
-                    <i class="bi bi-mortarboard-fill me-1"></i> KURIKULUM MERDEKA INFORMATIKA
-                </div>
                 <h3 class="fw-bold mb-1" style="color: var(--color-primary);">
                     Katalog Bahan Ajar & Modul Siap Tayang
                 </h3>
@@ -48,7 +45,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="col-md-5">
                 <form action="<?= base_url('guru/search.php') ?>" method="GET">
-                    <div class="input-group input-group-pill shadow-sm">
+                    <div class="input-group input-group-pill">
                         <span class="input-group-text bg-white border-end-0 text-muted ps-3">
                             <i class="bi bi-search"></i>
                         </span>
@@ -133,8 +130,8 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 
     <!-- Informasi Petunjuk Belajar untuk Guru -->
-    <div class="p-4 rounded-4 d-flex align-items-start gap-3 shadow-sm anim-reveal" style="background: linear-gradient(135deg, rgba(217, 217, 216, 0.95) 0%, rgba(177, 187, 200, 0.35) 100%); border: 1px solid var(--border-subtle);">
-        <div class="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: var(--color-primary); color: #ffffff;">
+    <div class="p-4 d-flex align-items-start gap-3 anim-reveal" style="background: var(--color-ice); border-radius: var(--radius-lg);">
+        <div class="p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: var(--color-primary); color: #ffffff; border-radius: var(--radius-sm);">
             <i class="bi bi-lightbulb-fill fs-5"></i>
         </div>
         <div>

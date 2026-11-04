@@ -116,17 +116,12 @@ $is_admin_tab = $selected_role === 'admin';
 
     <!-- Panel Kiri: Sambutan -->
     <aside class="login-welcome">
-        <span class="login-orb orb-1"></span>
-        <span class="login-orb orb-2"></span>
-        <span class="login-orb orb-3"></span>
-        <span class="login-orb orb-4"></span>
-
         <div class="login-welcome-content">
             <div class="login-logo">
                 <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5">
             </div>
-            <h1>WELCOME</h1>
-            <h2>Portal Bahan Ajar Informatika</h2>
+            <h1>Portal Bahan Ajar Informatika</h1>
+            <p>Modul, slide, dan referensi untuk guru Informatika SMA Negeri 5 Kota Ternate.</p>
         </div>
     </aside>
 
@@ -134,7 +129,7 @@ $is_admin_tab = $selected_role === 'admin';
     <main class="login-panel">
         <div class="login-form-wrap">
 
-            <h3 class="login-heading">Login</h3>
+            <h2 class="login-heading">Masuk</h2>
             <p class="login-sub">Silakan masuk menggunakan akun Anda</p>
 
             <?php if (!empty($error_message)): ?>
@@ -145,11 +140,11 @@ $is_admin_tab = $selected_role === 'admin';
             <?php endif; ?>
 
             <!-- Pilihan Peran -->
-            <div class="d-flex gap-2 mb-3 p-1 rounded-pill role-tabs">
-                <button type="button" id="tabGuru" class="btn rounded-pill flex-fill py-2 fw-semibold small border-0 role-tab <?= !$is_admin_tab ? 'text-white' : 'text-muted' ?>" style="background: <?= !$is_admin_tab ? '#2A4D88' : 'transparent' ?>;" onclick="selectRole('guru')">
+            <div class="role-tabs" role="group" aria-label="Pilih peran masuk">
+                <button type="button" id="tabGuru" class="role-tab<?= !$is_admin_tab ? ' is-active' : '' ?>" onclick="selectRole('guru')">
                     <i class="bi bi-person-workspace me-1"></i> Guru
                 </button>
-                <button type="button" id="tabAdmin" class="btn rounded-pill flex-fill py-2 fw-semibold small border-0 role-tab <?= $is_admin_tab ? 'text-white' : 'text-muted' ?>" style="background: <?= $is_admin_tab ? '#2A4D88' : 'transparent' ?>;" onclick="selectRole('admin')">
+                <button type="button" id="tabAdmin" class="role-tab<?= $is_admin_tab ? ' is-active' : '' ?>" onclick="selectRole('admin')">
                     <i class="bi bi-shield-lock me-1"></i> Admin
                 </button>
             </div>
@@ -201,24 +196,8 @@ $is_admin_tab = $selected_role === 'admin';
 <script>
 function selectRole(role) {
     document.getElementById('selectedRoleInput').value = role;
-    const tabGuru = document.getElementById('tabGuru');
-    const tabAdmin = document.getElementById('tabAdmin');
-
-    if (role === 'admin') {
-        tabAdmin.style.background = '#2A4D88';
-        tabAdmin.classList.add('text-white');
-        tabAdmin.classList.remove('text-muted');
-        tabGuru.style.background = 'transparent';
-        tabGuru.classList.remove('text-white');
-        tabGuru.classList.add('text-muted');
-    } else {
-        tabGuru.style.background = '#2A4D88';
-        tabGuru.classList.add('text-white');
-        tabGuru.classList.remove('text-muted');
-        tabAdmin.style.background = 'transparent';
-        tabAdmin.classList.remove('text-white');
-        tabAdmin.classList.add('text-muted');
-    }
+    document.getElementById('tabGuru').classList.toggle('is-active', role === 'guru');
+    document.getElementById('tabAdmin').classList.toggle('is-active', role === 'admin');
 }
 
 function fillDemo(email, password) {

@@ -94,14 +94,13 @@ $current_user = current_user();
                         <i class="bi bi-person-circle fs-6" style="color: var(--color-accent);"></i>
                         <span class="text-white nav-user-name"><?= e($current_user['nama']) ?></span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: 12px; border: 1px solid var(--border-subtle);">
+                    <ul class="dropdown-menu dropdown-menu-end" data-ui style="border-radius: var(--radius-md); border: 1px solid var(--border-subtle); box-shadow: 0 12px 32px rgba(14, 29, 46, 0.16);">
                         <li class="px-3 py-2 border-bottom">
                             <span class="d-block fw-bold small text-dark"><?= e($current_user['nama']) ?></span>
                             <span class="d-block text-muted small"><?= e($current_user['email']) ?></span>
                             <span class="badge rounded-pill mt-1" style="background-color: var(--color-primary); color: #ffffff;">Administrator</span>
                         </li>
                         <li><a class="dropdown-item py-2" href="<?= base_url('guru/index.php') ?>"><i class="bi bi-book me-2" style="color: var(--color-primary);"></i> Halaman Bahan Ajar</a></li>
-                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item py-2 text-danger" href="<?= base_url('auth/logout.php') ?>"><i class="bi bi-box-arrow-right me-2"></i> Keluar (Logout)</a></li>
                     </ul>
                 </div>

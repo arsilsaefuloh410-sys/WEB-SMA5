@@ -171,7 +171,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="card-body p-4 p-md-5">
 
                     <div class="text-center mb-4">
-                        <div class="brand-icon-box mx-auto mb-3 bg-success" style="width: 52px; height: 52px; font-size: 1.5rem; background: linear-gradient(135deg, #2A4D88, #7C94B8);">
+                        <div class="brand-icon-box mx-auto mb-3" style="width: 52px; height: 52px; font-size: 1.5rem; background: #2A4D88; color: #ffffff;">
                             <i class="bi bi-person-plus"></i>
                         </div>
                         <h4 class="fw-bold text-dark mb-1">Daftar Akun Guru</h4>
