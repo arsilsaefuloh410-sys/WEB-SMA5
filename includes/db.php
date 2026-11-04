@@ -30,6 +30,16 @@ try {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            (function () {
+                var W = 1200;
+                var w = window.innerWidth || document.documentElement.clientWidth;
+                var s = w > 0 ? w / W : 0;
+                if (s > 0 && s < 1) {
+                    document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=' + W + ', initial-scale=' + Math.round(s * 10000) / 10000);
+                }
+            })();
+        </script>
         <title>Perhatian: Koneksi Database Belum Terhubung - <?= APP_NAME ?></title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

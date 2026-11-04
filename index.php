@@ -63,35 +63,40 @@ require_once __DIR__ . '/includes/header.php';
         <div class="container position-relative" style="z-index: 2;">
         <div class="row align-items-center gy-4">
             <div class="col-lg-7">
-                <!-- Identitas Sekolah -->
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="brand-icon-box flex-shrink-0" style="width: 52px; height: 52px; background:#ffffff; border: 1px solid rgba(255,255,255,0.28); box-shadow: none;">
-                        <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
+                <div class="hero-text-card">
+                    <!-- Identitas Sekolah -->
+                    <div class="d-flex align-items-center gap-3 mb-2 hero-school-row">
+                        <div class="brand-icon-box flex-shrink-0" style="width: 52px; height: 52px; background:#ffffff; border: 1px solid rgba(255,255,255,0.28); box-shadow: none;">
+                            <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
+                        </div>
+                        <div class="lh-1">
+                            <span class="d-block welcome-school-name">SMA NEGERI 5</span>
+                            <span class="d-block welcome-school-city">KOTA TERNATE</span>
+                        </div>
                     </div>
-                    <div class="lh-1">
-                        <span class="d-block welcome-school-name">SMA NEGERI 5</span>
-                        <span class="d-block welcome-school-city">KOTA TERNATE</span>
+                    <h1 class="hero-title">
+                        Selamat Datang
+                    </h1>
+                    <p class="hero-subtitle hero-lead">
+                        Senang Anda berkunjung. Di sini tersedia bahan ajar Informatika untuk Kelas 10–12 — modul ajar, slide presentasi, dan referensi terpercaya yang siap dipakai mengajar tanpa perlu menyiapkan semuanya dari awal.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 align-items-center anim-reveal" style="--d: 0.2s;">
+                        <?php if (is_logged_in()): ?>
+                            <a href="<?= base_url('guru/index.php') ?>" class="btn-pill welcome-hero-btn">
+                                <i class="bi bi-collection-play"></i> Lihat Katalog Bahan Ajar
+                            </a>
+                            <a href="<?= base_url('guru/search.php') ?>" class="btn-pill" style="border: 1px solid rgba(255,255,255,0.55); background: transparent; color: #ffffff;">
+                                <i class="bi bi-search"></i> Cari Topik Materi
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= base_url('auth/login.php') ?>" class="btn-pill welcome-hero-btn">
+                                <i class="bi bi-box-arrow-in-right"></i> Masuk Sebagai Guru
+                            </a>
+                            <a href="#katalog-kelas" class="btn-pill" style="border: 1px solid rgba(255,255,255,0.55); background: transparent; color: #ffffff;">
+                                <i class="bi bi-arrow-down-circle"></i> Lihat Jenjang Kelas
+                            </a>
+                        <?php endif; ?>
                     </div>
-                </div>
-                <h1 class="hero-title">
-                    Selamat Datang
-                </h1>
-                <div class="d-flex flex-wrap gap-3 align-items-center anim-reveal" style="--d: 0.2s;">
-                    <?php if (is_logged_in()): ?>
-                        <a href="<?= base_url('guru/index.php') ?>" class="btn-pill welcome-hero-btn">
-                            <i class="bi bi-collection-play"></i> Buka Katalog Bahan Ajar
-                        </a>
-                        <a href="<?= base_url('guru/search.php') ?>" class="btn-pill" style="border: 1px solid rgba(255,255,255,0.55); background: transparent; color: #ffffff;">
-                            <i class="bi bi-search"></i> Cari Topik Materi
-                        </a>
-                    <?php else: ?>
-                        <a href="<?= base_url('auth/login.php') ?>" class="btn-pill welcome-hero-btn">
-                            <i class="bi bi-box-arrow-in-right"></i> Masuk Akun Guru
-                        </a>
-                        <a href="#katalog-kelas" class="btn-pill" style="border: 1px solid rgba(255,255,255,0.55); background: transparent; color: #ffffff;">
-                            <i class="bi bi-arrow-down-circle"></i> Lihat Jenjang Kelas
-                        </a>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>

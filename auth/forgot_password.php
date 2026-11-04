@@ -92,6 +92,16 @@ $page_title = 'Lupa Kata Sandi';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            var W = 1200;
+            var w = window.innerWidth || document.documentElement.clientWidth;
+            var s = w > 0 ? w / W : 0;
+            if (s > 0 && s < 1) {
+                document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=' + W + ', initial-scale=' + Math.round(s * 10000) / 10000);
+            }
+        })();
+    </script>
     <title><?= e($page_title) ?> - Portal Bahan Ajar</title>
     <meta name="description" content="Atur ulang kata sandi akun portal bahan ajar Informatika SMAN 5 Kota Ternate.">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232A4D88'/%3E%3Cpath d='M16 8 5 13l11 5 11-5-11-5Zm-6 8.5V21c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 2.7-6-2.7Z' fill='%23fff'/%3E%3C/svg%3E">
