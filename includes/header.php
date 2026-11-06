@@ -130,7 +130,7 @@ function render_nav_menu(string $suffix): void
     <!-- Sidebar Permanen di Kiri (Tersembunyi Secara Default) -->
     <aside class="app-sidebar">
         <a class="side-brand" href="<?= base_url('index.php') ?>">
-            <div class="side-brand-icon" style="background:#ffffff;">
+            <div class="side-brand-icon" style="background:transparent;">
                 <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
             </div>
             <div class="min-width-0">
@@ -173,7 +173,7 @@ function render_nav_menu(string $suffix): void
             <?php endif; ?>
 
             <a class="navbar-brand navbar-brand-main d-flex align-items-center gap-2 me-lg-4 text-decoration-none" href="<?= base_url('index.php') ?>">
-                <div class="brand-icon-box flex-shrink-0" style="background:#ffffff;">
+                <div class="brand-icon-box flex-shrink-0" style="background:transparent;">
                     <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
                 </div>
                 <div class="d-flex flex-column lh-1 min-width-0">

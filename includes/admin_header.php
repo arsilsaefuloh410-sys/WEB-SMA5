@@ -70,7 +70,7 @@ $current_user = current_user();
     <header class="navbar navbar-expand-lg sticky-top px-3 py-2 shadow-sm" style="background-color: var(--color-primary); border-bottom: 1px solid rgba(177, 187, 200, 0.2);">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center gap-2 text-white" href="<?= base_url('admin/index.php') ?>">
-                <div class="brand-icon-box" style="width:36px; height:36px; background:#ffffff; border: 1px solid rgba(175,203,233,0.3);">
+                <div class="brand-icon-box" style="width:36px; height:36px; background:transparent; border:none;">
                     <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;padding:2px;box-sizing:border-box;">
                 </div>
                 <div class="d-flex flex-column min-width-0">

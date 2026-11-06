@@ -97,7 +97,7 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="hero-text-card">
                         <!-- Identitas Sekolah -->
                         <div class="d-flex align-items-center gap-3 mb-2 hero-school-row">
-                            <div class="brand-icon-box flex-shrink-0" style="width: 52px; height: 52px; background:#ffffff; border: 1px solid rgba(255,255,255,0.28); box-shadow: none;">
+                            <div class="brand-icon-box flex-shrink-0" style="width: 52px; height: 52px; background:transparent; border: none; box-shadow: none;">
                                 <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
                             </div>
                             <div class="lh-1">
