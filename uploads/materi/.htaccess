@@ -1,0 +1,4 @@
+# Tolak akses HTTP langsung ke berkas materi.
+# Akses hanya melalui guru/unduh.php (unduh) dan guru/preview.php (pratinjau)
+# yang memverifikasi sesi login terlebih dahulu.
+Require all denied

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Pendaftaran Akun Guru Baru (Verifikasi Email + Persetujuan Admin)
  *
@@ -64,6 +64,7 @@ $nama = '';
 $email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $action = $_POST['action'] ?? 'register';
 
     // --- Kirim ulang tautan verifikasi (tanpa mengisi ulang formulir) ---
@@ -82,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success_message = 'Pengiriman email gagal (konfigurasi SMTP belum diisi di berkas .env). '
                     . 'Karena mode debug aktif, tautan verifikasi ditampilkan di bawah ini.';
             } else {
-                $error_message = 'Email verifikasi gagal dikirim. Silakan coba lagi nanti atau hubungi administrator.';
+                $error_message = $resend['message'] ?? 'Email verifikasi gagal dikirim. Silakan coba lagi nanti atau hubungi administrator.';
             }
         }
     } else {
@@ -96,13 +97,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error_message = 'Mohon lengkapi semua data formulir.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error_message = 'Format alamat email tidak valid.';
+        } elseif (strlen($email) > 100) {
+            $error_message = 'Alamat email maksimal 100 karakter.';
         } elseif (is_disposable_email($email)) {
             $error_message = 'Alamat email sekali pakai / email sementara tidak diizinkan. '
                 . 'Gunakan email aktif milik Anda (misalnya Gmail) agar dapat menerima tautan verifikasi.';
         } elseif (strlen($nama) > 100) {
             $error_message = 'Nama lengkap maksimal 100 karakter.';
-        } elseif (!validate_password_strength($password)['valid']) {
-            $error_message = validate_password_strength($password)['message'];
+        } elseif (!($pwCheck = validate_password_strength($password))['valid']) {
+            $error_message = $pwCheck['message'];
         } elseif ($password !== $password_confirm) {
             $error_message = 'Konfirmasi kata sandi tidak cocok.';
         } else {
@@ -120,15 +123,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hashed = password_hash($password, PASSWORD_BCRYPT);
 
                 // Satu pendaftaran aktif per email: ganti data lama bila ada
-                $del = $pdo->prepare("DELETE FROM registration_verifications WHERE email = ?");
-                $del->execute([$email]);
+                // Dibungkus try/catch agar race condition (INSERT unique clash) tidak fatal
+                $storeOk = true;
+                try {
+                    $del = $pdo->prepare("DELETE FROM registration_verifications WHERE email = ?");
+                    $del->execute([$email]);
 
-                $ins = $pdo->prepare("
-                    INSERT INTO registration_verifications (nama, email, password_hash, token_hash, expires_at, used, created_at)
-                    VALUES (?, ?, ?, ?, ?, 0, ?)
-                ");
-                $ins->execute([$nama, $email, $hashed, $token_hash, $expires_at, $now]);
+                    $ins = $pdo->prepare("
+                        INSERT INTO registration_verifications (nama, email, password_hash, token_hash, expires_at, used, created_at)
+                        VALUES (?, ?, ?, ?, ?, 0, ?)
+                    ");
+                    $ins->execute([$nama, $email, $hashed, $token_hash, $expires_at, $now]);
+                } catch (PDOException $e) {
+                    // Baris kembar masih ada (race) — coba perbarui langsung
+                    try {
+                        $upd = $pdo->prepare("UPDATE registration_verifications SET nama = ?, password_hash = ?, token_hash = ?, expires_at = ?, used = 0, created_at = ? WHERE email = ?");
+                        $upd->execute([$nama, $hashed, $token_hash, $expires_at, $now, $email]);
+                    } catch (PDOException $e2) {
+                        $storeOk = false;
+                        $error_message = 'Terjadi gangguan saat menyimpan pendaftaran. Silakan coba lagi.';
+                    }
+                }
 
+                if ($storeOk) {
                 // Kirim tautan verifikasi ke alamat email pendaftar
                 $verify_url = app_url('auth/verify_email.php?token=' . urlencode($token));
                 $subject = 'Verifikasi Email Pendaftaran - ' . APP_NAME;
@@ -155,6 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $error_message = 'Email verifikasi gagal dikirim karena kesalahan server. Silakan coba lagi nanti atau hubungi administrator.';
                 }
+                } // if ($storeOk)
             }
         }
     }
@@ -202,6 +220,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <div class="text-center">
                             <p class="small text-muted mb-2">Tautan kedaluwarsa atau email belum diterima?</p>
                             <form action="" method="POST" class="d-inline">
+                                <?= csrf_field() ?>
                                 <input type="hidden" name="action" value="resend">
                                 <input type="hidden" name="email" value="<?= e($email) ?>">
                                 <button type="submit" class="btn btn-outline-primary btn-sm fw-semibold">
@@ -211,6 +230,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                     <?php else: ?>
                         <form action="" method="POST" autocomplete="off">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="action" value="register">
 
                             <div class="mb-3">

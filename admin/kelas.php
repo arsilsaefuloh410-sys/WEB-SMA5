@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Kelola Jenjang Kelas (Admin)
  */
@@ -14,10 +14,11 @@ $page_title = 'Kelola Jenjang Kelas';
 
 // Handle POST: Update deskripsi kelas
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $action = $_POST['action'] ?? '';
     
     if ($action === 'edit') {
-        $id = (int)$_POST['id'];
+        $id = (int)($_POST['id'] ?? 0);
         $nama_kelas = trim($_POST['nama_kelas'] ?? '');
         $tingkat = (int)($_POST['tingkat'] ?? 10);
         $deskripsi = trim($_POST['deskripsi'] ?? '');
@@ -25,7 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($nama_kelas)) {
             $stmt = $pdo->prepare("UPDATE kelas SET nama_kelas = ?, tingkat = ?, deskripsi = ? WHERE id = ?");
             $stmt->execute([$nama_kelas, $tingkat, $deskripsi, $id]);
-            set_flash('success', 'Data ' . e($nama_kelas) . ' berhasil diperbarui.');
+            if ($stmt->rowCount() > 0) {
+                set_flash('success', 'Data ' . e($nama_kelas) . ' berhasil diperbarui.');
+            } else {
+                set_flash('warning', 'Tidak ada perubahan yang disimpan (data sama atau kelas tidak ditemukan).');
+            }
         } else {
             set_flash('danger', 'Nama kelas tidak boleh kosong.');
         }
@@ -100,6 +105,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <form action="" method="POST">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="edit">
                                     <input type="hidden" name="id" value="<?= $kls['id'] ?>">
 

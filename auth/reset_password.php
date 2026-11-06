@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Halaman Reset Kata Sandi
  * Dibuka melalui tautan yang dikirim ke email. Token divalidasi
@@ -50,29 +50,34 @@ if (!$reset_row) {
 
     // --- Langkah 2: Proses penyimpanan kata sandi baru ---
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
         $password = $_POST['password'] ?? '';
         $password_confirm = $_POST['password_confirm'] ?? '';
 
         if ($password === '' || $password_confirm === '') {
             $error_message = 'Silakan isi kata sandi baru dan konfirmasinya.';
-        } elseif (!validate_password_strength($password)['valid']) {
-            $error_message = validate_password_strength($password)['message'];
+        } elseif (!($pwCheck = validate_password_strength($password))['valid']) {
+            $error_message = $pwCheck['message'];
         } elseif ($password !== $password_confirm) {
             $error_message = 'Konfirmasi kata sandi tidak cocok dengan kata sandi baru.';
         } else {
             $hashed = password_hash($password, PASSWORD_BCRYPT);
 
-            // Perbarui kata sandi pengguna
+            // Perbarui kata sandi pengguna — pastikan benar-benar ada baris yang berubah
             $upd = $pdo->prepare("UPDATE users SET password = ? WHERE email = ?");
             $upd->execute([$hashed, $user_email]);
 
-            // Tandai token sudah dipakai (hapus agar tidak bisa dipakai ulang)
-            $del = $pdo->prepare("DELETE FROM password_resets WHERE id = ?");
-            $del->execute([$reset_row['id']]);
+            if ($upd->rowCount() === 0) {
+                $error_message = 'Akun dengan tautan ini tidak ditemukan lagi. Silakan minta tautan reset yang baru.';
+            } else {
+                // Tandai token sudah dipakai (hapus agar tidak bisa dipakai ulang)
+                $del = $pdo->prepare("DELETE FROM password_resets WHERE id = ?");
+                $del->execute([$reset_row['id']]);
 
-            set_flash('success', 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.');
-            header('Location: ' . base_url('auth/login.php'));
-            exit;
+                set_flash('success', 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.');
+                header('Location: ' . base_url('auth/login.php'));
+                exit;
+            }
         }
     }
 }
@@ -132,12 +137,13 @@ $page_title = 'Reset Kata Sandi';
             <?php if (!empty($error_message)): ?>
                 <div class="alert login-alert d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <div><?= $error_message ?></div>
+                    <div><?= e($error_message) ?></div>
                 </div>
             <?php endif; ?>
 
             <?php if ($token_valid): ?>
                 <form action="" method="POST" autocomplete="off">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="token" value="<?= e($token) ?>">
 
                     <!-- Kata Sandi Baru -->

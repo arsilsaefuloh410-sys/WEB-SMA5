@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Kelola Daftar Topik / Bab Pembelajaran Informatika
  */
@@ -14,6 +14,7 @@ $page_title = 'Kelola Topik & Materi';
 
 // Handle POST Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $action = $_POST['action'] ?? '';
 
     // 1. Tambah Topik
@@ -47,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 2. Edit Topik
     if ($action === 'edit') {
-        $id = (int)$_POST['id'];
-        $kelas_id = (int)$_POST['kelas_id'];
+        $id = (int)($_POST['id'] ?? 0);
+        $kelas_id = (int)($_POST['kelas_id'] ?? 0);
         $judul_topik = trim($_POST['judul_topik'] ?? '');
         $elemen = trim($_POST['elemen'] ?? 'BK');
         $deskripsi = trim($_POST['deskripsi'] ?? '');
@@ -63,7 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 WHERE id = ?
             ");
             $stmt->execute([$kelas_id, $judul_topik, $elemen, $deskripsi, $urutan, $id]);
-            set_flash('success', 'Perubahan topik berhasil disimpan.');
+            if ($stmt->rowCount() > 0) {
+                set_flash('success', 'Perubahan topik berhasil disimpan.');
+            } else {
+                set_flash('warning', 'Tidak ada perubahan yang disimpan (data sama atau topik tidak ditemukan).');
+            }
         }
         header('Location: ' . base_url('admin/topik.php'));
         exit;
@@ -71,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 3. Hapus Topik
     if ($action === 'delete') {
-        $id = (int)$_POST['id'];
+        $id = (int)($_POST['id'] ?? 0);
         
         // Hapus fisik berkas-berkas yang ada dalam topik ini terlebih dahulu
         $stmtFiles = $pdo->prepare("SELECT path_file FROM file_materi WHERE topik_id = ?");
@@ -84,7 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmtDel = $pdo->prepare("DELETE FROM topik WHERE id = ?");
         $stmtDel->execute([$id]);
 
-        set_flash('success', 'Topik beserta seluruh berkas dan referensinya berhasil dihapus.');
+        if ($stmtDel->rowCount() > 0) {
+            set_flash('success', 'Topik beserta seluruh berkas dan referensinya berhasil dihapus.');
+        } else {
+            set_flash('danger', 'Topik tidak ditemukan — mungkin sudah dihapus sebelumnya.');
+        }
         header('Location: ' . base_url('admin/topik.php'));
         exit;
     }
@@ -115,6 +124,19 @@ $sql .= " ORDER BY k.tingkat ASC, t.urutan ASC, t.id ASC";
 $stmtTopik = $pdo->prepare($sql);
 $stmtTopik->execute($params);
 $daftarTopik = $stmtTopik->fetchAll();
+
+// Usulan "Nomor Urut Bab" berikutnya — dihitung per kelas terpilih (bukan total semua kelas)
+$urutanKelasId = $filter_kelas_id > 0 ? $filter_kelas_id : (int)($daftarKelas[0]['id'] ?? 0);
+$defaultUrutan = 1;
+if ($urutanKelasId > 0) {
+    try {
+        $cnt = $pdo->prepare("SELECT COUNT(*) FROM topik WHERE kelas_id = ?");
+        $cnt->execute([$urutanKelasId]);
+        $defaultUrutan = ((int)$cnt->fetchColumn()) + 1;
+    } catch (Exception $e) {
+        $defaultUrutan = count($daftarTopik) + 1;
+    }
+}
 
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
@@ -219,7 +241,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                     <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editModal<?= $topik['id'] ?>" title="Edit Topik">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button type="button" class="btn btn-outline-danger confirm-delete" data-item-name="topik '<?= e($topik['judul_topik']) ?>'" onclick="submitDelete(<?= $topik['id'] ?>)" title="Hapus Topik">
+                                    <button type="button" class="btn btn-outline-danger" data-item-name="topik '<?= e($topik['judul_topik']) ?>'" onclick="submitDelete(<?= $topik['id'] ?>)" title="Hapus Topik">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -231,6 +253,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
                                     <form action="" method="POST">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="edit">
                                         <input type="hidden" name="id" value="<?= $topik['id'] ?>">
 
@@ -295,6 +318,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form action="" method="POST">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="add">
 
                 <div class="modal-header">
@@ -333,7 +357,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-semibold">Nomor Urut Bab</label>
-                            <input type="number" name="urutan" class="form-control" value="<?= count($daftarTopik) + 1 ?>" required min="1">
+                            <input type="number" name="urutan" class="form-control" value="<?= $defaultUrutan ?>" required min="1">
                         </div>
                         <div class="col-md-12">
                             <label class="form-label small fw-semibold">Deskripsi / Penjelasan Konsep Topik</label>
@@ -352,6 +376,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
 <!-- Form tersembunyi untuk delete -->
 <form id="deleteForm" action="" method="POST" style="display: none;">
+    <?= csrf_field() ?>
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="id" id="deleteTopikId" value="">
 </form>

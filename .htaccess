@@ -1,0 +1,4 @@
+# Blokir akses HTTP ke berkas konfigurasi rahasia
+<FilesMatch "(?i)^(\.env|\.env\..*|\.git.*|composer\.(json|lock))$">
+    Require all denied
+</FilesMatch>

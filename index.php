@@ -14,24 +14,6 @@ require_login();
 $active_menu = 'beranda';
 $page_title = 'Beranda - Portal Bahan Ajar Informatika';
 
-// Ambil data jenjang kelas dan statistik materi
-$stmtKelas = $pdo->query("
-    SELECT k.*, 
-           COUNT(DISTINCT t.id) as total_topik,
-           COUNT(DISTINCT f.id) as total_file,
-           COUNT(DISTINCT r.id) as total_referensi
-    FROM kelas k
-    LEFT JOIN topik t ON k.id = t.kelas_id
-    LEFT JOIN file_materi f ON t.id = f.topik_id
-    LEFT JOIN referensi r ON t.id = r.topik_id
-    GROUP BY k.id
-    ORDER BY k.tingkat ASC
-");
-$daftarKelas = $stmtKelas->fetchAll();
-
-// Ambil total statistik sistem
-$stats = get_app_stats($pdo);
-
 // Topik per tingkat kelas (dipakai daftar berjenjang di bagian katalog)
 $stmtTopik = $pdo->query("
     SELECT t.id, t.judul_topik, t.elemen, k.tingkat,
@@ -107,7 +89,7 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="hero-wrapper hero-fullbleed hero-with-photo">
                     <div class="hero-slideshow" id="heroSlideshow" aria-hidden="true">
                         <?php foreach ($heroSlides as $i => $foto): ?>
-                            <div class="hero-slide<?= $i === 0 ? ' is-active' : '' ?>" data-slide="<?= $i ?>" style="background-image: url('<?= base_url($foto) ?>');"></div>
+                            <div class="hero-slide<?= $i === 0 ? ' is-active' : '' ?>" data-slide="<?= $i ?>" style="background-image: url('<?= e(base_url($foto)) ?>');"></div>
                         <?php endforeach; ?>
                     </div>
                     <div class="hero-overlay" aria-hidden="true"></div>

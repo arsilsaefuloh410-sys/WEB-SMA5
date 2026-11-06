@@ -6,8 +6,17 @@
  * Mengatur parameter database, sesi pengguna, serta konstanta aplikasi.
  */
 
-// Mulai sesi jika belum aktif
+// Mulai sesi jika belum aktif (dengan cookie terlindungi)
 if (session_status() === PHP_SESSION_NONE) {
+    // Tolak ID sesi yang dipasang klien (anti-fixation) — harus sebelum session_start
+    ini_set('session.use_strict_mode', '1');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+        'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+    ]);
     session_start();
 }
 
@@ -54,11 +63,6 @@ define('MAX_FILE_SIZE', 20 * 1024 * 1024); // Maksimal 20 Megabytes
 define('ALLOWED_EXTENSIONS', ['pdf', 'ppt', 'pptx']);
 define('UPLOAD_DIR', __DIR__ . '/../uploads/materi/');
 
-/**
- * Mendeteksi base path web secara otomatis
- * Mendukung akses langsung (http://localhost:8000)
- * maupun via folder htdocs XAMPP (http://localhost/folder-anda/)
- */
 /**
  * Mendeteksi base path web secara otomatis
  * Mendukung akses langsung (http://localhost:8000)

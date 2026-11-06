@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Kelola Berkas Bahan Ajar & Link Referensi per Topik
  * Pengelolaan terpusat yang praktis dan tidak berbelit-belit untuk Admin
@@ -37,6 +37,7 @@ if (!$topik) {
 
 // Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $action = $_POST['action'] ?? '';
 
     // 1. Upload Berkas Bahan Ajar (PPT / PDF)
@@ -140,7 +141,7 @@ $stmtRefs->execute([$topik_id]);
 $daftarRefs = $stmtRefs->fetchAll();
 
 $active_admin_menu = 'topik';
-$page_title = 'Kelola Materi: ' . e($topik['judul_topik']);
+$page_title = 'Kelola Materi: ' . $topik['judul_topik'];
 
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
@@ -205,8 +206,9 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <div class="card-body p-4">
                 <!-- Form Unggah Berkas Baru -->
                 <form action="" method="POST" enctype="multipart/form-data">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="upload_file">
-                    <input type="file" name="file_berkas" id="file_berkas" class="d-none validate-file-upload" accept=".pdf,.ppt,.pptx" required>
+                    <input type="file" name="file_berkas" id="file_berkas" class="d-none validate-file-upload" accept=".pdf,.ppt,.pptx">
                     <div class="input-group">
                         <label for="file_berkas" class="btn btn-outline-primary d-inline-flex align-items-center mb-0" style="cursor: pointer;">
                             <i class="bi bi-folder2-open me-1"></i> Pilih Berkas
@@ -233,7 +235,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             $ext = strtolower($f['tipe_file']);
                             $is_pdf = ($ext === 'pdf');
                             $badge = get_file_badge($ext);
-                            $f_url = base_url($f['path_file']);
+                            $f_url = base_url('guru/preview.php?id=' . $f['id']);
+                            $f_download = base_url('guru/unduh.php?id=' . $f['id']);
                         ?>
                         <div class="p-3 border rounded d-flex align-items-center justify-content-between bg-white hover-shadow">
                             <div class="d-flex align-items-center gap-2 overflow-hidden pe-2">
@@ -243,7 +246,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                         <?= e($f['nama_file']) ?>
                                     </div>
                                     <small class="text-muted" style="font-size: 0.75rem;">
-                                        <?= format_bytes($f['ukuran_file']) ?> • <?= date('d/m/Y', strtotime($f['uploaded_at'])) ?>
+                                        <?= format_bytes($f['ukuran_file']) ?> â€¢ <?= date('d/m/Y', strtotime($f['uploaded_at'])) ?>
                                     </small>
                                 </div>
                             </div>
@@ -254,10 +257,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 <?php endif; ?>
-                                <a href="<?= $f_url ?>" download="<?= e($f['nama_file']) ?>" class="btn btn-sm btn-outline-primary py-1 px-2" title="Unduh Berkas">
+                                <a href="<?= $f_download ?>" class="btn btn-sm btn-outline-primary py-1 px-2" title="Unduh Berkas">
                                     <i class="bi bi-download"></i>
                                 </a>
                                 <form action="" method="POST" class="d-inline" onsubmit="return confirm('Hapus berkas ini?')">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete_file">
                                     <input type="hidden" name="file_id" value="<?= $f['id'] ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Hapus Berkas">
@@ -290,6 +294,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <div class="card-body p-4">
                 <!-- Form Tambah Link Referensi Baru -->
                 <form action="" method="POST">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="add_referensi">
 
                     <div class="mb-2">
@@ -331,6 +336,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                     <i class="bi bi-box-arrow-up-right"></i>
                                 </a>
                                 <form action="" method="POST" class="d-inline" onsubmit="return confirm('Hapus tautan ini?')">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete_referensi">
                                     <input type="hidden" name="ref_id" value="<?= $ref['id'] ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Hapus Tautan">

@@ -8,17 +8,20 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/functions.php';
 
-// Cek hak akses: Halaman auth (login/logout) dan beranda landing page (index.php) dapat diakses publik
+// Cek hak akses: Halaman auth (login/logout/register) tidak butuh login.
+// Halaman lain yang memakai header ini wajib login — termasuk index.php
+// (guard tambahan di tiap halaman tetap berlaku sebagai lapis kedua).
 $current_script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-if (!preg_match('~/auth/~', $current_script) && !preg_match('~/index\.php$~', $current_script)) {
+if (!preg_match('~/auth/~', $current_script)) {
     require_login();
 }
 
 // Penanda halaman login (untuk menyembunyikan navigasi saat tamu belum login)
 $on_login_page = (bool) preg_match('~/auth/login\.php$~', $current_script);
 
-// Penanda halaman beranda (gaya editorial: shell tanpa padding, margin diatur halaman)
-$on_landing = (bool) preg_match('~/index\.php$~', $current_script);
+// Penanda halaman beranda ROOT (gaya editorial) — bukan guru/index.php
+$on_landing = (bool) preg_match('~/index\.php$~', $current_script)
+    && !preg_match('~/(guru|admin|auth|includes)/~', $current_script);
 
 $page_title = isset($page_title) ? $page_title . ' - ' . APP_NAME : APP_NAME;
 $current_user = current_user();

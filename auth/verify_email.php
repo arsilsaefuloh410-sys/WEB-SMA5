@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Halaman Verifikasi Email Pendaftaran (Langkah 2)
  * Dibuka melalui tautan yang dikirim ke email pendaftar. Token divalidasi,
@@ -53,6 +53,7 @@ if (!$reg_row) {
 
     // --- Proses konfirmasi: buat akun berstatus pending ---
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_csrf();
         // Cek apakah email sudah menjadi akun (misal admin sudah membuat langsung)
         $cek = $pdo->prepare("SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1");
         $cek->execute([$reg_email]);
@@ -65,11 +66,12 @@ if (!$reg_row) {
 
         try {
             // Akun dibuat dengan status 'pending': belum bisa masuk sebelum disetujui admin
+            // Waktu diambil dari PHP (bukan NOW() database) agar konsisten dengan tabel lain
             $ins = $pdo->prepare("
                 INSERT INTO users (nama, email, password, role, status, created_at)
-                VALUES (?, ?, ?, 'guru', 'pending', NOW())
+                VALUES (?, ?, ?, 'guru', 'pending', ?)
             ");
-            $ins->execute([$reg_row['nama'], $reg_row['email'], $reg_row['password_hash']]);
+            $ins->execute([$reg_row['nama'], $reg_row['email'], $reg_row['password_hash'], date('Y-m-d H:i:s')]);
 
             // Token dikonsumsi: hapus baris verifikasi
             $del = $pdo->prepare("DELETE FROM registration_verifications WHERE id = ?");
@@ -77,7 +79,7 @@ if (!$reg_row) {
 
             $token_valid = false;
             $success_message = 'Email berhasil diverifikasi dan akun <strong>' . e($reg_email) . '</strong> telah dibuat. '
-                . 'Akun Anda berstatus <strong>menunggu persetujuan administrator</strong> — '
+                . 'Akun Anda berstatus <strong>menunggu persetujuan administrator</strong> â€” '
                 . 'Anda baru dapat masuk setelah akun diaktifkan. Silakan hubungi administrator sekolah.';
         } catch (PDOException $ex) {
             error_log('[REGISTER VERIFY ERROR] ' . $ex->getMessage());
@@ -150,10 +152,6 @@ $page_title = 'Verifikasi Email Pendaftaran';
                     <i class="bi bi-patch-check-fill me-2 mt-1"></i>
                     <div><?= $success_message ?></div>
                 </div>
-
-                <div class="login-back">
-                    <a href="<?= base_url('auth/login.php') ?>"><i class="bi bi-arrow-left me-1"></i>Kembali ke halaman Login</a>
-                </div>
             <?php elseif ($token_valid): ?>
                 <div class="alert alert-light border d-flex align-items-start mb-3" role="alert">
                     <i class="bi bi-envelope-paper me-2 mt-1 text-primary"></i>
@@ -165,6 +163,7 @@ $page_title = 'Verifikasi Email Pendaftaran';
                 </div>
 
                 <form action="" method="POST" autocomplete="off">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="token" value="<?= e($token) ?>">
 
                     <button type="submit" class="btn-signin">

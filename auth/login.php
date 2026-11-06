@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Halaman Masuk (Login)
  * Pilih peran (Guru / Admin) + akun demo, tampilan tetap simpel.
@@ -25,6 +25,7 @@ if (!in_array($selected_role, ['guru', 'admin'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $selected_role = $_POST['role'] ?? 'guru';
@@ -33,48 +34,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $email_input = $email;
 
-    // Proteksi brute-force: kunci sementara bila terlalu banyak percobaan gagal
-    $lock_seconds = get_login_lockout_seconds($pdo, $email);
-    if ($lock_seconds > 0) {
-        $mins = (int)ceil($lock_seconds / 60);
-        $error_message = 'Terlalu banyak percobaan login gagal. Akun dikunci sementara selama ±' . $mins
-            . ' menit. Silakan coba lagi nanti atau hubungi administrator.';
-    } elseif (empty($email) || empty($password)) {
+    // Validasi input kosong dulu sebelum menanyakan status lockout
+    if (empty($email) || empty($password)) {
         $error_message = 'Silakan masukkan email dan kata sandi Anda.';
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password'])) {
-            if ($user['status'] === 'pending') {
-                $error_message = 'Akun Anda masih menunggu persetujuan administrator. Silakan hubungi administrator sekolah untuk mengaktifkan akun Anda.';
-            } elseif ($user['role'] !== $selected_role) {
-                $error_message = 'Akun ini terdaftar sebagai ' . ($user['role'] === 'admin' ? 'Administrator' : 'Guru Pengajar') . '. Silakan pilih ' . ($user['role'] === 'admin' ? 'Administrator' : 'Guru Pengajar') . '.';
-            } else {
-                // Berhasil login
-                clear_login_attempts($pdo, $email);
-                session_regenerate_id(true);
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user'] = [
-                    'id'    => $user['id'],
-                    'nama'  => $user['nama'],
-                    'email' => $user['email'],
-                    'role'  => $user['role'],
-                ];
-
-                if ($user['role'] === 'admin') {
-                    set_flash('success', 'Selamat datang kembali, <strong>' . e($user['nama']) . '</strong>.');
-                    header('Location: ' . base_url('admin/index.php'));
-                } else {
-                    set_flash('success', 'Selamat datang, <strong>' . e($user['nama']) . '</strong>.');
-                    header('Location: ' . base_url('index.php'));
-                }
-                exit;
-            }
+        // Proteksi brute-force: kunci sementara bila terlalu banyak percobaan gagal
+        $lock_seconds = get_login_lockout_seconds($pdo, $email);
+        if ($lock_seconds > 0) {
+            $mins = (int)ceil($lock_seconds / 60);
+            $error_message = 'Terlalu banyak percobaan login gagal. Akun dikunci sementara selama Â±' . $mins
+                . ' menit. Silakan coba lagi nanti atau hubungi administrator.';
         } else {
-            record_login_attempt($pdo, $email);
-            $error_message = 'Email atau kata sandi tidak sesuai.';
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                if ($user['status'] === 'pending') {
+                    $error_message = 'Akun Anda masih menunggu persetujuan administrator. Silakan hubungi administrator sekolah untuk mengaktifkan akun Anda.';
+                } elseif ($user['role'] !== $selected_role) {
+                    $error_message = 'Akun ini terdaftar sebagai ' . ($user['role'] === 'admin' ? 'Administrator' : 'Guru Pengajar') . '. Silakan pilih ' . ($user['role'] === 'admin' ? 'Administrator' : 'Guru Pengajar') . '.';
+                } else {
+                    // Berhasil login
+                    clear_login_attempts($pdo, $email);
+                    session_regenerate_id(true);
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user'] = [
+                        'id'    => $user['id'],
+                        'nama'  => $user['nama'],
+                        'email' => $user['email'],
+                        'role'  => $user['role'],
+                    ];
+
+                    if ($user['role'] === 'admin') {
+                        set_flash('success', 'Selamat datang kembali, <strong>' . e($user['nama']) . '</strong>.');
+                        header('Location: ' . base_url('admin/index.php'));
+                    } else {
+                        set_flash('success', 'Selamat datang, <strong>' . e($user['nama']) . '</strong>.');
+                        header('Location: ' . base_url('index.php'));
+                    }
+                    exit;
+                }
+            } else {
+                record_login_attempt($pdo, $email);
+                $error_message = 'Email atau kata sandi tidak sesuai.';
+            }
         }
     }
 }
@@ -150,6 +154,7 @@ $is_admin_tab = $selected_role === 'admin';
             </div>
 
             <form action="" method="POST" autocomplete="off">
+                <?= csrf_field() ?>
                 <input type="hidden" name="role" id="selectedRoleInput" value="<?= e($selected_role) ?>">
 
                 <!-- Email -->

@@ -1671,7 +1671,7 @@ html.js-tabs .ed-panel.is-active { display: flex; }
     .ed-place video { display: none; }
 
     .ed-place {
-        background: var(--field) url('../assets/a-view-around-kalamata-fort-ternate-north-poster.jpg') center / cover no-repeat;
+        background: var(--field) url('../a-view-around-kalamata-fort-ternate-north-poster.jpg') center / cover no-repeat;
         min-height: clamp(280px, 56vh, 560px);
     }
 }

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Halaman Lupa Kata Sandi
  * Pengguna memasukkan email terdaftar, lalu link reset dikirim via email.
@@ -20,6 +20,7 @@ $debug_reset_url = '';
 $email_input = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $email = trim($_POST['email'] ?? '');
     $email_input = $email;
 
@@ -140,7 +141,7 @@ $page_title = 'Lupa Kata Sandi';
             <?php if (!empty($error_message)): ?>
                 <div class="alert login-alert d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <div><?= $error_message ?></div>
+                    <div><?= e($error_message) ?></div>
                 </div>
             <?php endif; ?>
 
@@ -162,6 +163,7 @@ $page_title = 'Lupa Kata Sandi';
                 </div>
             <?php else: ?>
                 <form action="" method="POST" autocomplete="off">
+                    <?= csrf_field() ?>
                     <!-- Email -->
                     <div class="login-field">
                         <i class="bi bi-envelope field-icon"></i>

@@ -16,6 +16,43 @@ function e($string) {
 }
 
 /**
+ * Mengambil (atau membuat) token CSRF sesi
+ */
+function csrf_token(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Menghasilkan tag input tersembunyi berisi token CSRF
+ */
+function csrf_field(): string {
+    return '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">';
+}
+
+/**
+ * Memverifikasi token CSRF pada request POST
+ */
+function csrf_check(): bool {
+    $token = (string)($_POST['csrf_token'] ?? '');
+    $expected = (string)($_SESSION['csrf_token'] ?? '');
+    return $expected !== '' && hash_equals($expected, $token);
+}
+
+/**
+ * Menolak request POST yang token CSRF-nya tidak valid
+ */
+function require_csrf(): void {
+    if (!csrf_check()) {
+        set_flash('danger', 'Token keamanan kedaluwarsa atau tidak valid. Silakan muat ulang halaman dan coba lagi.');
+        header('Location: ' . ($_SERVER['REQUEST_URI'] ?? base_url('index.php')));
+        exit;
+    }
+}
+
+/**
  * Cek apakah pengguna sudah login
  */
 function is_logged_in() {
@@ -37,10 +74,32 @@ function is_admin() {
 }
 
 /**
- * Cek apakah pengguna adalah Guru
+ * Memuat ulang data pengguna dari database ke sesi.
+ * Mengembalikan false + memusnahkan sesi bila akun sudah dihapus/dinonaktifkan.
  */
-function is_guru() {
-    return is_logged_in() && ($_SESSION['user']['role'] ?? '') === 'guru';
+function refresh_session_user(PDO $pdo): bool {
+    if (!is_logged_in()) {
+        return false;
+    }
+    try {
+        $stmt = $pdo->prepare("SELECT id, nama, email, role, status FROM users WHERE id = ? LIMIT 1");
+        $stmt->execute([$_SESSION['user_id']]);
+        $user = $stmt->fetch();
+        if (!$user || $user['status'] !== 'aktif') {
+            $_SESSION = [];
+            session_destroy();
+            return false;
+        }
+        $_SESSION['user'] = [
+            'id'    => $user['id'],
+            'nama'  => $user['nama'],
+            'email' => $user['email'],
+            'role'  => $user['role'],
+        ];
+        return true;
+    } catch (Exception $e) {
+        return true; // DB bermasalah — jangan paksa logout agar halaman tetap terjangkau
+    }
 }
 
 /**
@@ -49,6 +108,13 @@ function is_guru() {
 function require_login() {
     if (!is_logged_in()) {
         set_flash('warning', 'Silakan masuk (login) terlebih dahulu untuk mengakses halaman tersebut.');
+        header('Location: ' . base_url('auth/login.php'));
+        exit;
+    }
+    // Cek ulang status akun dari DB (admin bisa menonaktifkan di tengah sesi)
+    $pdoRef = $GLOBALS['pdo'] ?? null;
+    if ($pdoRef instanceof PDO && !refresh_session_user($pdoRef)) {
+        set_flash('warning', 'Sesi Anda berakhir karena akun tidak lagi aktif. Silakan masuk kembali.');
         header('Location: ' . base_url('auth/login.php'));
         exit;
     }
@@ -410,11 +476,15 @@ function record_login_attempt(PDO $pdo, string $email): void {
 
 /**
  * Menghapus catatan percobaan gagal (setelah login berhasil)
+ * Menghapus juga baris IP yang sama agar kunci-berbasis-IP ikut terbuka
  */
 function clear_login_attempts(PDO $pdo, string $email): void {
     try {
-        $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = ?");
-        $stmt->execute([strtolower($email)]);
+        $ip = get_client_ip();
+        $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = ? OR ip_address = ?");
+        $stmt->execute([strtolower($email), $ip]);
+        // Bersihkan baris lama agar tabel tidak tumbuh tanpa batas
+        $pdo->exec("DELETE FROM login_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 2 DAY)");
     } catch (Exception $e) {
         // Abaikan bila tabel belum ada
     }

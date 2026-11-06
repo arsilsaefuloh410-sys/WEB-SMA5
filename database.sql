@@ -245,9 +245,7 @@ INSERT INTO `referensi` (`id`, `topik_id`, `judul_link`, `url`) VALUES
 -- Disimpan di folder uploads/materi/
 -- --------------------------------------------------------
 INSERT INTO `file_materi` (`id`, `topik_id`, `nama_file`, `path_file`, `tipe_file`, `ukuran_file`, `uploaded_by`, `uploaded_at`) VALUES
-(1, 1, 'Modul_Ajar_Berpikir_Komputasional_Kelas10.pdf', 'uploads/materi/sample_modul_berpikir_komputasional.pdf', 'pdf', 542000, 1, NOW()),
-(2, 1, 'Slide_Presentasi_Berpikir_Komputasional.pptx', 'uploads/materi/sample_slide_berpikir_komputasional.pptx', 'pptx', 1250000, 1, NOW()),
-(3, 2, 'Panduan_Praktik_Integrasi_Office_MailMerge.pdf', 'uploads/materi/sample_integrasi_office.pdf', 'pdf', 430000, 1, NOW()),
-(4, 3, 'Slide_Presentasi_Sistem_Komputer_Hardware.pptx', 'uploads/materi/sample_sistem_komputer.pptx', 'pptx', 1820000, 1, NOW()),
-(5, 4, 'Bahan_Ajar_Jaringan_Komputer_Internet.pdf', 'uploads/materi/sample_jaringan_internet.pdf', 'pdf', 720000, 1, NOW()),
-(6, 12, 'Panduan_Guru_Pengantar_Kecerdasan_Artifisial.pdf', 'uploads/materi/sample_pengantar_ai.pdf', 'pdf', 890000, 1, NOW());
+(1, 1, 'Modul_Ajar_Berpikir_Komputasional_Kelas10.pdf', 'uploads/materi/sample_modul_berpikir_komputasional.pdf', 'pdf', 827, 1, NOW()),
+(3, 2, 'Panduan_Praktik_Integrasi_Office_MailMerge.pdf', 'uploads/materi/sample_integrasi_office.pdf', 'pdf', 821, 1, NOW()),
+(4, 3, 'Slide_Presentasi_Sistem_Komputer_Hardware.pptx', 'uploads/materi/sample_sistem_komputer.pptx', 'pptx', 77, 1, NOW()),
+(6, 12, 'Panduan_Guru_Pengantar_Kecerdasan_Artifisial.pdf', 'uploads/materi/sample_pengantar_ai.pdf', 'pdf', 837, 1, NOW());

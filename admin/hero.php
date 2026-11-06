@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Kelola Foto Beranda (Admin)
  * 1. Foto hero: 3 slot latar belakang slideshow yang bergantian (fade in/out).
@@ -23,11 +23,16 @@ define('HERO_MAX_WIDTH', 1400); // Lebar maksimal hasil resize (hemat memori & b
 // Ambil data pengaturan hero dari database
 function get_hero_slides(PDO $pdo): array {
     $slides = [];
-    $stmt = $pdo->query("SELECT kunci, nilai FROM pengaturan WHERE kunci LIKE 'hero_slide_%'");
-    foreach ($stmt->fetchAll() as $row) {
-        $slides[$row['kunci']] = $row['nilai'];
+    try {
+        $stmt = $pdo->query("SELECT kunci, nilai FROM pengaturan WHERE kunci LIKE 'hero_slide_%'");
+        foreach ($stmt->fetchAll() as $row) {
+            $slides[$row['kunci']] = $row['nilai'];
+        }
+        ksort($slides);
+    } catch (Exception $e) {
+        // Tabel pengaturan belum dimigrasi — kembalikan kosong agar halaman tetap tampil
+        $slides = [];
     }
-    ksort($slides);
     return $slides;
 }
 
@@ -57,13 +62,15 @@ function get_gallery_items(PDO $pdo): array {
             }
         }
     } catch (Exception $e) {
-        // Tabel pengaturan belum ada — biarkan kosong
+        // Tabel pengaturan belum ada â€” biarkan kosong
     }
     return $items;
 }
 
 // Handle POST: upload, hapus, geser, simpan_caption
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
+    $isAjax = (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest');
     $action = $_POST['action'] ?? '';
     $slot = $_POST['slot'] ?? '';
     $isGallery = in_array($slot, GALLERY_SLOTS, true);
@@ -156,19 +163,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
 
                     if ($saved) {
+                        // Simpan ke DB dulu — hanya hapus file lama bila DB berhasil
+                        $dbKey = $isGallery ? $slot . '_image' : $slot;
+                        save_hero_slide($pdo, $dbKey, HERO_UPLOAD_URL_REL . $newName);
                         if (!empty($old)) {
                             $oldPath = HERO_UPLOAD_DIR . basename($old);
                             if (is_file($oldPath)) {
                                 @unlink($oldPath);
                             }
                         }
-                        // Kunci DB: hero = slot langsung, gallery = slot_image
-                        $dbKey = $isGallery ? $slot . '_image' : $slot;
-                        save_hero_slide($pdo, $dbKey, HERO_UPLOAD_URL_REL . $newName);
-                        set_flash('success', $gdReady
+                        $msg = $gdReady
                             ? 'Foto berhasil diunggah (otomatis dikompres agar ringan).'
-                            : 'Foto berhasil diunggah.');
+                            : 'Foto berhasil diunggah.';
+                        if ($isAjax) {
+                            header('Content-Type: application/json');
+                            echo json_encode(['ok' => true, 'message' => $msg]);
+                            exit;
+                        }
+                        set_flash('success', $msg);
                     } else {
+                        if ($isAjax) {
+                            header('Content-Type: application/json');
+                            echo json_encode(['ok' => false, 'message' => 'Gagal menyimpan berkas. Periksa izin folder uploads/hero.']);
+                            exit;
+                        }
                         set_flash('danger', 'Gagal menyimpan berkas. Periksa izin folder uploads/hero.');
                     }
                 }
@@ -180,12 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $old = get_hero_slides($pdo)[$slot] ?? '';
         }
-        if (!empty($old)) {
-            $oldPath = HERO_UPLOAD_DIR . basename($old);
-            if (is_file($oldPath)) {
-                @unlink($oldPath);
-            }
-        }
+        // Kosongkan DB dulu — hanya hapus file fisik bila DB berhasil
         save_hero_slide($pdo, $isGallery ? $slot . '_image' : $slot, '');
         if ($isGallery) {
             // Hapus foto sekaligus kosongkan teks keterangan
@@ -193,6 +206,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             set_flash('success', 'Foto dan teks keterangan berhasil dihapus.');
         } else {
             set_flash('success', 'Foto hero berhasil dihapus.');
+        }
+        if (!empty($old)) {
+            $oldPath = HERO_UPLOAD_DIR . basename($old);
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
         }
     } elseif ($action === 'geser') {
         // Tukar isi slot dengan slot tetangga (naik/turun) untuk mengatur urutan tampil
@@ -204,8 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $arah = $_POST['arah'] ?? '';
         $slotOrder = HERO_SLOTS;
         $idx = array_search($slot, $slotOrder, true);
-        if ($idx === false) {
-            set_flash('danger', 'Slot tidak valid.');
+        if ($idx === false || !in_array($arah, ['naik', 'turun'], true)) {
+            set_flash('danger', 'Slot atau arah geser tidak valid.');
         } else {
             $targetIdx = $arah === 'naik' ? $idx - 1 : $idx + 1;
             if ($targetIdx < 0 || $targetIdx > 2) {
@@ -230,6 +249,22 @@ $gallery = get_gallery_items($pdo);
 
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        var msg = sessionStorage.getItem('heroUploadMsg');
+        if (msg) {
+            sessionStorage.removeItem('heroUploadMsg');
+            var banner = document.createElement('div');
+            banner.className = 'alert alert-success alert-dismissible fade show';
+            banner.setAttribute('role', 'alert');
+            banner.textContent = msg;
+            var main = document.querySelector('main') || document.querySelector('.container') || document.body;
+            main.insertBefore(banner, main.firstChild);
+        }
+    } catch (e) {}
+});
+</script>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-3 border-bottom">
     <div>
@@ -291,6 +326,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
                 <!-- Form Unggah -->
                 <form action="" method="POST" enctype="multipart/form-data" class="mb-2">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="upload">
                     <input type="hidden" name="slot" value="<?= $slot ?>">
                     <div class="mb-2">
@@ -305,6 +341,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                 <div class="d-flex gap-2 mb-2">
                     <?php if ($slot !== 'hero_slide_1'): ?>
                     <form action="" method="POST" class="flex-fill">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="geser">
                         <input type="hidden" name="slot" value="<?= $slot ?>">
                         <input type="hidden" name="arah" value="naik">
@@ -315,6 +352,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <?php endif; ?>
                     <?php if ($slot !== 'hero_slide_3'): ?>
                     <form action="" method="POST" class="flex-fill">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="geser">
                         <input type="hidden" name="slot" value="<?= $slot ?>">
                         <input type="hidden" name="arah" value="turun">
@@ -325,6 +363,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                     <?php endif; ?>
                 </div>
                 <form action="" method="POST">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="hapus">
                     <input type="hidden" name="slot" value="<?= $slot ?>">
                     <button type="submit" class="btn btn-sm btn-outline-danger w-100" style="border-radius: 8px;" onclick="return confirm('Hapus foto ini?');">
@@ -339,12 +378,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
 </div>
 
 <!-- ==========================================================
- * FOTO & KETERANGAN BERANDA — 3 foto + teks di bawahnya
+ * FOTO & KETERANGAN BERANDA â€” 3 foto + teks di bawahnya
  * ========================================================== -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-3 mt-2 border-bottom">
     <div>
         <h6 class="fw-bold mb-1" style="color: var(--color-primary);"><i class="bi bi-card-image me-1"></i>Foto &amp; Keterangan Beranda</h6>
-        <p class="text-muted small mb-0">Maksimal 3 foto yang tampil berdampingan di beranda, masing-masing dengan <strong>teks keterangan</strong> di bawahnya. Isi foto dan teks secara terpisah — keduanya bisa diubah kapan saja.</p>
+        <p class="text-muted small mb-0">Maksimal 3 foto yang tampil berdampingan di beranda, masing-masing dengan <strong>teks keterangan</strong> di bawahnya. Isi foto dan teks secara terpisah â€” keduanya bisa diubah kapan saja.</p>
     </div>
 </div>
 
@@ -393,6 +432,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
                 <!-- Form Unggah Foto -->
                 <form action="" method="POST" enctype="multipart/form-data" class="mb-3">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="upload">
                     <input type="hidden" name="slot" value="<?= $slot ?>">
                     <div class="mb-2">
@@ -406,11 +446,12 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
                 <!-- Form Teks Keterangan -->
                 <form action="" method="POST" class="mb-2">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="simpan_caption">
                     <input type="hidden" name="slot" value="<?= $slot ?>">
                     <div class="mb-2">
                         <label class="form-label small fw-semibold mb-1" for="caption_<?= $slot ?>">Teks Keterangan</label>
-                        <textarea name="caption" id="caption_<?= $slot ?>" class="form-control form-control-sm" rows="2" maxlength="160" placeholder="Contoh: Benteng Kalamata, Ternate — kota tempat sekolah ini berdiri" style="border-radius: 8px;"><?= e($caption) ?></textarea>
+                        <textarea name="caption" id="caption_<?= $slot ?>" class="form-control form-control-sm" rows="2" maxlength="160" placeholder="Contoh: Benteng Kalamata, Ternate â€” kota tempat sekolah ini berdiri" style="border-radius: 8px;"><?= e($caption) ?></textarea>
                         <div class="form-text small">Maksimal 160 karakter. Kosongkan bila tidak ingin menampilkan teks.</div>
                     </div>
                     <button type="submit" class="btn btn-sm w-100 fw-semibold" style="border: 1px solid var(--color-primary); color: var(--color-primary); background: transparent; border-radius: 8px;">
@@ -420,6 +461,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
                 <?php if (!empty($file)): ?>
                 <form action="" method="POST">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="hapus">
                     <input type="hidden" name="slot" value="<?= $slot ?>">
                     <button type="submit" class="btn btn-sm btn-outline-danger w-100" style="border-radius: 8px;" onclick="return confirm('Hapus foto dan teks keterangan ini?');">
@@ -438,10 +480,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
         <h6 class="fw-bold mb-2" style="color: var(--color-primary);"><i class="bi bi-info-circle me-1"></i>Catatan</h6>
         <ul class="mb-0 small text-muted">
             <li>Format yang diizinkan: JPG, PNG, WebP. Maksimal 3 MB per foto.</li>
-            <li><strong>Unggah Foto Baru</strong>: pilih berkas lalu klik Unggah — foto langsung disimpan (otomatis dikompres agar ringan).</li>
-            <li><strong>Crop Foto</strong>: hanya muncul jika slot sudah berisi foto. Klik untuk membuka kotak crop, geser/perbesar area sesuai keinginan, lalu klik <strong>Gunakan Hasil Crop &amp; Unggah</strong> — hasil crop otomatis menggantikan foto lama.</li>
+            <li><strong>Unggah Foto Baru</strong>: pilih berkas lalu klik Unggah â€” foto langsung disimpan (otomatis dikompres agar ringan).</li>
+            <li><strong>Crop Foto</strong>: hanya muncul jika slot sudah berisi foto. Klik untuk membuka kotak crop, geser/perbesar area sesuai keinginan, lalu klik <strong>Gunakan Hasil Crop &amp; Unggah</strong> â€” hasil crop otomatis menggantikan foto lama.</li>
             <li>Rasio crop slideshow hero mengikuti tampilan banner (16:6), sedangkan foto &amp; keterangan memakai rasio 4:3.</li>
-            <li><strong>Teks Keterangan</strong> disimpan terpisah dari foto — Anda bisa mengubah teks tanpa mengunggah ulang fotonya.</li>
+            <li><strong>Teks Keterangan</strong> disimpan terpisah dari foto â€” Anda bisa mengubah teks tanpa mengunggah ulang fotonya.</li>
             <li>Jika semua slot hero kosong, banner beranda kembali memakai tampilan gradien bawaan.</li>
             <li>Jika semua foto &amp; keterangan kosong, bagian beranda menampilkan video bawaan (Benteng Kalamata).</li>
         </ul>
@@ -482,11 +524,11 @@ require_once __DIR__ . '/../includes/admin_header.php';
 /* Inisialisasi ditunda sampai DOM siap (Bootstrap bundle dimuat setelah skrip ini) */
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
-        console.error('Bootstrap JS belum termuat — fitur crop tidak aktif.');
+        console.error('Bootstrap JS belum termuat â€” fitur crop tidak aktif.');
         return;
     }
     if (typeof Cropper === 'undefined') {
-        console.error('Cropper.js belum termuat — fitur crop tidak aktif.');
+        console.error('Cropper.js belum termuat â€” fitur crop tidak aktif.');
         return;
     }
 
@@ -575,15 +617,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 var fd = new FormData();
                 fd.append('action', 'upload');
                 fd.append('slot', activeSlot);
+                fd.append('csrf_token', <?= json_encode(csrf_token()) ?>);
                 fd.append('hero_image', blob, 'hero-crop.jpg');
-                fetch(window.location.href, { method: 'POST', body: fd })
-                    .then(function (res) {
-                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: fd,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (!data.ok) throw new Error(data.message || 'upload gagal');
+                        try { sessionStorage.setItem('heroUploadMsg', data.message); } catch (e) {}
                         location.reload();
                     })
-                    .catch(function () {
+                    .catch(function (err) {
                         resetSaveBtn();
-                        alert('Gagal mengunggah hasil crop. Periksa koneksi/lalu ulangi.');
+                        alert(err.message || 'Gagal mengunggah hasil crop. Periksa koneksi/lalu ulangi.');
                     });
             }, 'image/jpeg', 0.88);
     });

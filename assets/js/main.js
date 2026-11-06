@@ -50,18 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 3. Konfirmasi Ramah saat Menghapus Data
-    const deleteButtons = document.querySelectorAll('.confirm-delete');
-    deleteButtons.forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            const itemLabel = this.getAttribute('data-item-name') || 'item ini';
-            const confirmMsg = 'Apakah Bapak/Ibu yakin ingin menghapus ' + itemLabel + '?\nData yang dihapus tidak dapat dikembalikan.';
-            if (!confirm(confirmMsg)) {
-                e.preventDefault();
-            }
-        });
-    });
-
     // 4. Filter / Pencarian Instan di Daftar Topik (Live Filter + Elemen Filter)
     const quickSearchInput = document.getElementById('quickTopicSearch');
     const elemenButtons = document.querySelectorAll('.btn-filter-elemen');
@@ -89,7 +77,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (noResultEl) {
-            noResultEl.style.display = (visibleCount === 0) ? 'block' : 'none';
+            // Hanya tampilkan pesan "tidak ditemukan" bila memang ada item yang bisa difilter
+            // (bila daftar awal kosong, kartu "Belum Ada Topik" sudah menangani)
+            noResultEl.style.display = (topicItems.length > 0 && visibleCount === 0) ? 'block' : 'none';
         }
     }
 

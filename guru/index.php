@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/functions.php';
 // Wajib masuk (login) terlebih dahulu
 require_login();
 
-$active_menu = 'kelas';
+$active_menu = 'katalog';
 $page_title = 'Pusat Bahan Ajar Guru';
 
 // Mengambil daftar kelas dan statistik lengkap per kelas

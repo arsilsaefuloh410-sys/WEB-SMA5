@@ -28,25 +28,28 @@ if (!$file) {
     exit;
 }
 
-// Update jumlah unduhan
-$updateStmt = $pdo->prepare("UPDATE file_materi SET download_count = download_count + 1 WHERE id = ?");
-$updateStmt->execute([$file_id]);
+// Lokasi fisik berkas — pastikan berada di dalam UPLOAD_DIR (cegah path traversal)
+$full_path = realpath(__DIR__ . '/../' . ltrim($file['path_file'], '/'));
+$upload_root = realpath(UPLOAD_DIR);
 
-// Lokasi fisik berkas
-$full_path = __DIR__ . '/../' . ltrim($file['path_file'], '/');
-
-if (!file_exists($full_path)) {
+if ($full_path === false || $upload_root === false
+    || !str_starts_with($full_path, $upload_root . DIRECTORY_SEPARATOR)
+    || !is_file($full_path)) {
     set_flash('warning', 'Berkas fisik materi belum tersedia di server.');
     header('Location: ' . base_url('guru/topik.php?id=' . $file['topik_id']));
     exit;
 }
+
+// Update jumlah unduhan — hanya setelah berkas dipastikan ada
+$updateStmt = $pdo->prepare("UPDATE file_materi SET download_count = download_count + 1 WHERE id = ?");
+$updateStmt->execute([$file_id]);
 
 // Bersihkan buffer keluaran sebelum streaming berkas
 if (ob_get_level()) {
     ob_end_clean();
 }
 
-$filename = basename($file['nama_file']);
+$filename = preg_replace('/[\r\n"]+/', '_', basename($file['nama_file']));
 $mime_types = [
     'pdf' => 'application/pdf',
     'ppt' => 'application/vnd.ms-powerpoint',
@@ -57,7 +60,8 @@ $content_type = $mime_types[$ext] ?? 'application/octet-stream';
 
 header('Content-Description: File Transfer');
 header('Content-Type: ' . $content_type);
-header('Content-Disposition: attachment; filename="' . addslashes($filename) . '"');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
+header('X-Content-Type-Options: nosniff');
 header('Expires: 0');
 header('Cache-Control: must-revalidate');
 header('Pragma: public');

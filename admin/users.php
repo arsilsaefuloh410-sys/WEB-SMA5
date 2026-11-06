@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Kelola Akun Pengguna (Administrator & Guru)
  * Admin memiliki hak akses penuh membuat akun baru, memverifikasi akun guru, dan menentukan peran.
@@ -16,6 +16,7 @@ $page_title = 'Kelola Akun Pengguna';
 
 // Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $action = $_POST['action'] ?? '';
     $current_admin_id = current_user()['id'] ?? 0;
 
@@ -24,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nama = trim($_POST['nama'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
-        $role = ($_POST['role'] === 'admin') ? 'admin' : 'guru';
-        $status = ($_POST['status'] === 'pending') ? 'pending' : 'aktif';
+        $role = (($_POST['role'] ?? '') === 'admin') ? 'admin' : 'guru';
+        $status = (($_POST['status'] ?? '') === 'pending') ? 'pending' : 'aktif';
 
         if (empty($nama) || empty($email) || empty($password)) {
             set_flash('danger', 'Mohon lengkapi semua kolom yang wajib diisi, termasuk kata sandi awal.');
@@ -60,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user_id = (int)($_POST['user_id'] ?? 0);
         $nama = trim($_POST['nama'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $role = ($_POST['role'] === 'admin') ? 'admin' : 'guru';
-        $status = ($_POST['status'] === 'pending') ? 'pending' : 'aktif';
+        $role = (($_POST['role'] ?? '') === 'admin') ? 'admin' : 'guru';
+        $status = (($_POST['status'] ?? '') === 'pending') ? 'pending' : 'aktif';
 
         // Proteksi: Admin tidak boleh mengubah peran atau menonaktifkan akun sendiri
         if ($user_id === $current_admin_id) {
@@ -114,6 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     set_flash('warning', 'Akun <strong>' . e($targetUser['nama']) . '</strong> dinonaktifkan.');
                 }
+            } else {
+                set_flash('danger', 'Akun pengguna tidak ditemukan.');
             }
         }
         header('Location: ' . base_url('admin/users.php'));
@@ -132,14 +135,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newHash = password_hash($new_pass, PASSWORD_BCRYPT);
             $stmtReset = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
             $stmtReset->execute([$newHash, $user_id]);
-            // Catatan: setelah reset, semua percobaan login gagal untuk akun ini dihapus
-            $stmtEmail = $pdo->prepare("SELECT email FROM users WHERE id = ?");
-            $stmtEmail->execute([$user_id]);
-            $reset_email = $stmtEmail->fetchColumn();
-            if ($reset_email) {
-                clear_login_attempts($pdo, $reset_email);
+
+            if ($stmtReset->rowCount() === 0) {
+                set_flash('danger', 'Akun tidak ditemukan sehingga kata sandi tidak dapat direset.');
+            } else {
+                // Catatan: setelah reset, semua percobaan login gagal untuk akun ini dihapus
+                $stmtEmail = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+                $stmtEmail->execute([$user_id]);
+                $reset_email = $stmtEmail->fetchColumn();
+                if ($reset_email) {
+                    clear_login_attempts($pdo, $reset_email);
+                }
+                set_flash('success', 'Kata sandi berhasil di-reset. Beritahukan kata sandi baru tersebut kepada pemilik akun secara langsung.');
             }
-            set_flash('success', 'Kata sandi berhasil di-reset. Beritahukan kata sandi baru tersebut kepada pemilik akun secara langsung.');
         }
 
         header('Location: ' . base_url('admin/users.php'));
@@ -155,7 +163,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $stmtDel = $pdo->prepare("DELETE FROM users WHERE id = ?");
             $stmtDel->execute([$user_id]);
-            set_flash('success', 'Akun pengguna berhasil dihapus dari sistem.');
+            if ($stmtDel->rowCount() > 0) {
+                set_flash('success', 'Akun pengguna berhasil dihapus dari sistem.');
+            } else {
+                set_flash('danger', 'Akun tidak ditemukan — mungkin sudah dihapus sebelumnya.');
+            }
         }
         header('Location: ' . base_url('admin/users.php'));
         exit;
@@ -394,7 +406,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                 <div class="btn-group btn-group-sm">
                                     <!-- Tombol Verifikasi / Toggle Status Cepat -->
                                     <?php if (!$is_self): ?>
-                                        <form action="" method="POST" class="d-inline" onsubmit="return confirm('<?= $is_act ? 'Nonaktifkan akun ' . e($u['nama']) . '?' : 'Verifikasi dan aktifkan akun ' . e($u['nama']) . '?' ?>')">
+                                        <form action="" method="POST" class="d-inline" data-confirm="<?= e($is_act ? 'Nonaktifkan akun ' . $u['nama'] . '?' : 'Verifikasi dan aktifkan akun ' . $u['nama'] . '?') ?>" onsubmit="return confirm(this.dataset.confirm)">
+                                            <?= csrf_field() ?>
                                             <input type="hidden" name="action" value="toggle_status">
                                             <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
                                             <?php if ($is_act): ?>
@@ -421,7 +434,8 @@ require_once __DIR__ . '/../includes/admin_header.php';
 
                                     <!-- Hapus Akun (Disabled jika akun sendiri) -->
                                     <?php if (!$is_self): ?>
-                                        <form action="" method="POST" class="d-inline" onsubmit="return confirm('Hapus permanen akun <?= e($u['nama']) ?> dari sistem?')">
+                                        <form action="" method="POST" class="d-inline" data-confirm="<?= e('Hapus permanen akun ' . $u['nama'] . ' dari sistem?') ?>" onsubmit="return confirm(this.dataset.confirm)">
+                                            <?= csrf_field() ?>
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
                                             <button type="submit" class="btn btn-outline-danger" title="Hapus Akun">
@@ -438,6 +452,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <form action="" method="POST">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="edit">
                                         <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
 
@@ -465,10 +480,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                                 <label class="form-label small fw-semibold text-primary">Pilihan Peran (Role Pengguna)</label>
                                                 <select name="role" class="form-select border-primary" <?= $is_self ? 'disabled' : '' ?> required>
                                                     <option value="guru" <?= $u['role'] === 'guru' ? 'selected' : '' ?>>
-                                                        👨‍🏫 Guru Pengajar (Hanya Mengakses & Mengunduh Materi)
+                                                        ðŸ‘¨â€ðŸ« Guru Pengajar (Hanya Mengakses & Mengunduh Materi)
                                                     </option>
                                                     <option value="admin" <?= $u['role'] === 'admin' ? 'selected' : '' ?>>
-                                                        🛡️ Administrator (Akses Penuh CRUD Materi & Akun)
+                                                        ðŸ›¡ï¸ Administrator (Akses Penuh CRUD Materi & Akun)
                                                     </option>
                                                 </select>
                                                 <?php if ($is_self): ?>
@@ -504,6 +519,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                             <div class="modal-dialog modal-sm">
                                 <div class="modal-content">
                                     <form action="" method="POST">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="reset_password">
                                         <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
 
@@ -540,6 +556,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="" method="POST">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="add">
 
                 <div class="modal-header">
@@ -569,10 +586,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         <label class="form-label small fw-semibold text-primary">Pilihan Peran (Role Akun)</label>
                         <select name="role" class="form-select border-primary fw-semibold" required>
                             <option value="guru" selected>
-                                👨‍🏫 Guru Pengajar (Hanya Dapat Mengakses & Mengunduh Materi)
+                                ðŸ‘¨â€ðŸ« Guru Pengajar (Hanya Dapat Mengakses & Mengunduh Materi)
                             </option>
                             <option value="admin">
-                                🛡️ Administrator (Akses Penuh CRUD Materi & Akun)
+                                ðŸ›¡ï¸ Administrator (Akses Penuh CRUD Materi & Akun)
                             </option>
                         </select>
                         <div class="alert alert-light border small mt-2 py-2 mb-0">

@@ -18,8 +18,9 @@ if (ini_get("session.use_cookies")) {
 
 session_destroy();
 
-// Mulai sesi baru khusus untuk flash message
+// Mulai sesi baru khusus dengan ID berbeda untuk flash message
 session_start();
+session_regenerate_id(true);
 set_flash('info', 'Anda telah berhasil keluar dari akun.');
 header('Location: ' . base_url('auth/login.php'));
 exit;
