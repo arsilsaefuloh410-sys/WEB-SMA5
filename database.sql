@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS `referensi`;
 DROP TABLE IF EXISTS `topik`;
 DROP TABLE IF EXISTS `kelas`;
 DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `pengaturan`;
 
 CREATE TABLE `users` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -30,6 +31,25 @@ CREATE TABLE `users` (
   `status` ENUM('aktif','pending') NOT NULL DEFAULT 'aktif',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- 1c. TABEL PENGATURAN (pengaturan)
+-- Key-value untuk pengaturan tampilan beranda:
+--   hero_slide_1..3     : path foto slideshow hero
+--   gallery_1..3_image  : path foto & keterangan beranda
+--   gallery_1..3_caption: teks keterangan di bawah foto
+-- --------------------------------------------------------
+CREATE TABLE `pengaturan` (
+  `kunci` VARCHAR(50) NOT NULL,
+  `nilai` TEXT DEFAULT NULL,
+  PRIMARY KEY (`kunci`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed slot hero (kosong = memakai tampilan gradien bawaan)
+INSERT INTO `pengaturan` (`kunci`, `nilai`) VALUES
+('hero_slide_1', ''),
+('hero_slide_2', ''),
+('hero_slide_3', '');
 
 -- --------------------------------------------------------
 -- 1b. TABEL RESET KATA SANDI (password_resets)

@@ -143,18 +143,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Slideshow hero: ganti slide aktif tiap 6 detik (hanya opacity, sangat ringan)
-    const heroSlideshow = document.getElementById('heroSlideshow');
-    if (heroSlideshow) {
-        const slides = heroSlideshow.querySelectorAll('.hero-slide');
-        if (slides.length > 1) {
-            let current = 0;
-            setInterval(function () {
-                slides[current].classList.remove('is-active');
-                current = (current + 1) % slides.length;
-                slides[current].classList.add('is-active');
-            }, 6000);
-        }
+    function initFadeSlideshow(id, slideSelector) {
+        const box = document.getElementById(id);
+        if (!box) return;
+        const slides = box.querySelectorAll(slideSelector);
+        if (slides.length < 2) return;
+        let current = 0;
+        setInterval(function () {
+            slides[current].classList.remove('is-active');
+            current = (current + 1) % slides.length;
+            slides[current].classList.add('is-active');
+        }, 6000);
     }
+    initFadeSlideshow('heroSlideshow', '.hero-slide');
+    initFadeSlideshow('galSlideshow', '.ed-gal-slide');
 
     // Tab jenjang kelas di beranda (semua panel tetap terlihat tanpa JS)
     const tabButtons = document.querySelectorAll('.ed-tab[data-tab]');
@@ -308,4 +310,31 @@ function animateCount(el) {
         }
         syncThemeIcons();
     });
+})();
+
+/**
+ * 7. Tinggi navbar lengket -> variabel CSS --nav-h
+ *    Dipakai elemen sticky (judul "Yang Tersedia", tab jenjang kelas)
+ *    agar berhenti di bawah navbar, bukan tertutup navbar.
+ */
+(function () {
+    var nav = document.querySelector('.navbar-custom.sticky-top');
+    if (!nav) return;
+
+    function syncNavHeight() {
+        var h = Math.round(nav.getBoundingClientRect().height);
+        if (h > 0) {
+            document.documentElement.style.setProperty('--nav-h', h + 'px');
+        }
+    }
+
+    syncNavHeight();
+    window.addEventListener('resize', syncNavHeight, { passive: true });
+    window.addEventListener('orientationchange', syncNavHeight);
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(syncNavHeight);
+    }
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(syncNavHeight).observe(nav);
+    }
 })();

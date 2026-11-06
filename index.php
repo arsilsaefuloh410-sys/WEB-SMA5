@@ -63,6 +63,28 @@ if (empty($heroSlides)) {
     $heroSlides = ['assets/img/ternate-city.jpg'];
 }
 
+// Ambil foto & keterangan beranda dari pengaturan admin (3 foto + teks di bawahnya)
+$galleryItems = [];
+try {
+    $stmtGal = $pdo->query("SELECT kunci, nilai FROM pengaturan WHERE kunci LIKE 'gallery_%'");
+    $galRaw = [];
+    foreach ($stmtGal->fetchAll() as $rowGal) {
+        $galRaw[$rowGal['kunci']] = (string) $rowGal['nilai'];
+    }
+    foreach ([1, 2, 3] as $galNo) {
+        $galImage = trim($galRaw['gallery_' . $galNo . '_image'] ?? '');
+        if ($galImage === '') {
+            continue; // slot kosong — lewati
+        }
+        $galleryItems[] = [
+            'image' => $galImage,
+            'caption' => trim($galRaw['gallery_' . $galNo . '_caption'] ?? ''),
+        ];
+    }
+} catch (Exception $e) {
+    $galleryItems = []; // tabel pengaturan belum ada — pakai fallback video
+}
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
@@ -224,7 +246,28 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </section>
 
-    <!-- Satu gambar bergerak: potongan video tempat sekolah ini berdiri -->
+    <!-- ==========================================================
+     * FOTO & KETERANGAN BERANDA — slideshow bergantian dari admin.
+     * Tiap foto punya teks keterangan yang ikut berganti (fade).
+     * Jika semua kosong, tampilkan video bawaan (Benteng Kalamata).
+     * ========================================================== -->
+    <?php if (!empty($galleryItems)): ?>
+    <section class="ed-gallery anim-reveal" aria-label="Foto beranda">
+        <div class="ed-gal-slideshow" id="galSlideshow">
+            <?php foreach ($galleryItems as $i => $galItem): ?>
+            <div class="ed-gal-slide<?= $i === 0 ? ' is-active' : '' ?>"
+                 style="background-image: url('<?= e(base_url($galItem['image'])) ?>');"
+                 role="img"
+                 aria-label="<?= e($galItem['caption'] !== '' ? $galItem['caption'] : 'Foto beranda SMA Negeri 5 Kota Ternate') ?>">
+                <?php if ($galItem['caption'] !== ''): ?>
+                <span class="ed-gal-caption"><?= e($galItem['caption']) ?></span>
+                <?php endif; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+    <?php else: ?>
+    <!-- Satu gambar bergerak: potongan video tempat sekolah ini berdiri (fallback) -->
     <figure class="ed-place anim-reveal">
         <video autoplay muted loop playsinline preload="metadata"
                poster="<?= base_url('assets/a-view-around-kalamata-fort-ternate-north-poster.jpg') ?>"
@@ -235,6 +278,7 @@ require_once __DIR__ . '/includes/header.php';
             Benteng Kalamata, Ternate &mdash; kota tempat sekolah ini berdiri
         </figcaption>
     </figure>
+    <?php endif; ?>
 
     <!-- ==========================================================
      * 4. KATALOG KELAS — "Day tabs, banded agenda"

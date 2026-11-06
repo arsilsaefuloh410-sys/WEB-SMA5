@@ -1,7 +1,9 @@
 <?php
 /**
- * Kelola Foto Hero Beranda (Admin)
- * Mengunggah/menghapus 3 foto latar belakang hero yang bergantian (fade in/out).
+ * Kelola Foto Beranda (Admin)
+ * 1. Foto hero: 3 slot latar belakang slideshow yang bergantian (fade in/out).
+ * 2. Foto & Keterangan: 3 foto yang tampil di beranda, masing-masing
+ *    disertai teks keterangan di bawahnya. Keduanya disimpan di tabel `pengaturan`.
  */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -34,13 +36,60 @@ function save_hero_slide(PDO $pdo, string $kunci, string $nilai): void {
     $stmt->execute([$kunci, $nilai]);
 }
 
-// Handle POST: upload, hapus, reset
+const HERO_SLOTS = ['hero_slide_1', 'hero_slide_2', 'hero_slide_3'];
+const GALLERY_SLOTS = ['gallery_1', 'gallery_2', 'gallery_3'];
+
+// Ambil foto + keterangan galeri beranda dari database
+function get_gallery_items(PDO $pdo): array {
+    $items = [];
+    foreach (GALLERY_SLOTS as $slot) {
+        $items[$slot] = ['image' => '', 'caption' => ''];
+    }
+    try {
+        $stmt = $pdo->query("SELECT kunci, nilai FROM pengaturan WHERE kunci LIKE 'gallery_%'");
+        foreach ($stmt->fetchAll() as $row) {
+            foreach (GALLERY_SLOTS as $slot) {
+                if ($row['kunci'] === $slot . '_image') {
+                    $items[$slot]['image'] = (string) $row['nilai'];
+                } elseif ($row['kunci'] === $slot . '_caption') {
+                    $items[$slot]['caption'] = (string) $row['nilai'];
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // Tabel pengaturan belum ada — biarkan kosong
+    }
+    return $items;
+}
+
+// Handle POST: upload, hapus, geser, simpan_caption
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $slot = $_POST['slot'] ?? '';
+    $isGallery = in_array($slot, GALLERY_SLOTS, true);
 
-    if (!in_array($slot, ['hero_slide_1', 'hero_slide_2', 'hero_slide_3'], true)) {
+    if (!in_array($slot, HERO_SLOTS, true) && !$isGallery) {
         set_flash('danger', 'Slot foto tidak valid.');
+        header('Location: ' . base_url('admin/hero.php'));
+        exit;
+    }
+
+    if ($action === 'simpan_caption') {
+        // Simpan teks keterangan foto galeri (di bawah foto)
+        if (!$isGallery) {
+            set_flash('danger', 'Teks keterangan hanya untuk foto & keterangan beranda.');
+        } else {
+            $caption = trim((string) ($_POST['caption'] ?? ''));
+            $caption = preg_replace('/\s+/u', ' ', $caption);
+            $caption = strip_tags($caption);
+            if (mb_strlen($caption) > 160) {
+                $caption = mb_substr($caption, 0, 160);
+                set_flash('warning', 'Teks keterangan dipotong menjadi 160 karakter.');
+            } else {
+                set_flash('success', 'Teks keterangan berhasil disimpan.');
+            }
+            save_hero_slide($pdo, $slot . '_caption', $caption);
+        }
         header('Location: ' . base_url('admin/hero.php'));
         exit;
     }
@@ -66,8 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($imgInfo === false) {
                     set_flash('danger', 'Berkas yang diunggah bukan gambar yang valid.');
                 } else {
-                    $current = get_hero_slides($pdo);
-                    $old = $current[$slot] ?? '';
+                    if ($isGallery) {
+                        $old = get_gallery_items($pdo)[$slot]['image'] ?? '';
+                    } else {
+                        $old = get_hero_slides($pdo)[$slot] ?? '';
+                    }
                     $gdReady = function_exists('imagecreatefromjpeg') && function_exists('imagewebp');
                     $saved = false;
 
@@ -110,10 +162,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 @unlink($oldPath);
                             }
                         }
-                        save_hero_slide($pdo, $slot, HERO_UPLOAD_URL_REL . $newName);
+                        // Kunci DB: hero = slot langsung, gallery = slot_image
+                        $dbKey = $isGallery ? $slot . '_image' : $slot;
+                        save_hero_slide($pdo, $dbKey, HERO_UPLOAD_URL_REL . $newName);
                         set_flash('success', $gdReady
-                            ? 'Foto hero berhasil diunggah (otomatis dikompres agar ringan).'
-                            : 'Foto hero berhasil diunggah.');
+                            ? 'Foto berhasil diunggah (otomatis dikompres agar ringan).'
+                            : 'Foto berhasil diunggah.');
                     } else {
                         set_flash('danger', 'Gagal menyimpan berkas. Periksa izin folder uploads/hero.');
                     }
@@ -121,20 +175,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($action === 'hapus') {
-        $current = get_hero_slides($pdo);
-        $old = $current[$slot] ?? '';
+        if ($isGallery) {
+            $old = get_gallery_items($pdo)[$slot]['image'] ?? '';
+        } else {
+            $old = get_hero_slides($pdo)[$slot] ?? '';
+        }
         if (!empty($old)) {
             $oldPath = HERO_UPLOAD_DIR . basename($old);
             if (is_file($oldPath)) {
                 @unlink($oldPath);
             }
         }
-        save_hero_slide($pdo, $slot, '');
-        set_flash('success', 'Foto hero berhasil dihapus.');
+        save_hero_slide($pdo, $isGallery ? $slot . '_image' : $slot, '');
+        if ($isGallery) {
+            // Hapus foto sekaligus kosongkan teks keterangan
+            save_hero_slide($pdo, $slot . '_caption', '');
+            set_flash('success', 'Foto dan teks keterangan berhasil dihapus.');
+        } else {
+            set_flash('success', 'Foto hero berhasil dihapus.');
+        }
     } elseif ($action === 'geser') {
         // Tukar isi slot dengan slot tetangga (naik/turun) untuk mengatur urutan tampil
+        if ($isGallery) {
+            set_flash('danger', 'Foto & keterangan berada pada urutan tetap.');
+            header('Location: ' . base_url('admin/hero.php'));
+            exit;
+        }
         $arah = $_POST['arah'] ?? '';
-        $slotOrder = ['hero_slide_1', 'hero_slide_2', 'hero_slide_3'];
+        $slotOrder = HERO_SLOTS;
         $idx = array_search($slot, $slotOrder, true);
         if ($idx === false) {
             set_flash('danger', 'Slot tidak valid.');
@@ -158,6 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $slides = get_hero_slides($pdo);
+$gallery = get_gallery_items($pdo);
 
 require_once __DIR__ . '/../includes/admin_header.php';
 ?>
@@ -165,11 +234,18 @@ require_once __DIR__ . '/../includes/admin_header.php';
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-3 border-bottom">
     <div>
         <h3 class="fw-bold text-dark mb-0">Kelola Foto Beranda</h3>
-        <p class="text-muted small mb-0">Unggah maksimal 3 foto. Atur urutan tampil dengan tombol <strong>Naik</strong>/<strong>Turun</strong>. Foto akan bergantian tampil dengan animasi fade di halaman beranda.</p>
+        <p class="text-muted small mb-0">Kelola <strong>slideshow hero</strong> (bergantian fade) dan <strong>foto + teks keterangan</strong> yang tampil di bawahnya pada halaman beranda.</p>
     </div>
     <a href="<?= base_url('index.php') ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
         <i class="bi bi-eye me-1"></i> Lihat Beranda
     </a>
+</div>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-3 mb-3 border-bottom">
+    <div>
+        <h6 class="fw-bold mb-1" style="color: var(--color-primary);"><i class="bi bi-images me-1"></i>Slideshow Hero (Banner Atas)</h6>
+        <p class="text-muted small mb-0">Unggah maksimal 3 foto. Atur urutan tampil dengan tombol <strong>Naik</strong>/<strong>Turun</strong>. Foto akan bergantian tampil dengan animasi fade di halaman beranda.</p>
+    </div>
 </div>
 
 <div class="row g-4">
@@ -262,6 +338,101 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <?php endforeach; ?>
 </div>
 
+<!-- ==========================================================
+ * FOTO & KETERANGAN BERANDA — 3 foto + teks di bawahnya
+ * ========================================================== -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-3 mt-2 border-bottom">
+    <div>
+        <h6 class="fw-bold mb-1" style="color: var(--color-primary);"><i class="bi bi-card-image me-1"></i>Foto &amp; Keterangan Beranda</h6>
+        <p class="text-muted small mb-0">Maksimal 3 foto yang tampil berdampingan di beranda, masing-masing dengan <strong>teks keterangan</strong> di bawahnya. Isi foto dan teks secara terpisah — keduanya bisa diubah kapan saja.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <?php
+    $galleryLabels = [
+        'gallery_1' => 'Foto 1 (Kiri)',
+        'gallery_2' => 'Foto 2 (Tengah)',
+        'gallery_3' => 'Foto 3 (Kanan)',
+    ];
+    foreach ($galleryLabels as $slot => $label):
+        $item = $gallery[$slot] ?? ['image' => '', 'caption' => ''];
+        $file = $item['image'];
+        $caption = $item['caption'];
+        $url = !empty($file) ? base_url($file) : '';
+    ?>
+    <div class="col-12 col-md-4">
+        <div class="card card-modern bg-white h-100" style="border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0" style="color: var(--color-primary);"><?= e($label) ?></h6>
+                    <?php if (!empty($file)): ?>
+                        <span class="badge rounded-pill" style="background: var(--color-lime-soft); color: var(--color-primary-dark);">Terisi</span>
+                    <?php else: ?>
+                        <span class="badge rounded-pill bg-secondary">Kosong</span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Pratinjau -->
+                <div class="rounded-3 mb-3 d-flex align-items-center justify-content-center overflow-hidden" style="height: 160px; background: var(--color-ice); border: 1px dashed var(--border-subtle);">
+                    <?php if (!empty($file)): ?>
+                        <img src="<?= e($url) ?>" alt="<?= e($label) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                    <?php else: ?>
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image fs-2 d-block mb-1"></i>
+                            <small>Belum ada foto</small>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (!empty($file)): ?>
+                <button type="button" class="btn btn-sm w-100 fw-semibold mb-2 hero-recrop-btn" data-slot="<?= $slot ?>" data-src="<?= e($url) ?>" data-aspect="1.3333333333333333" style="border: 1px solid var(--color-primary); color: var(--color-primary); background: transparent; border-radius: 8px;">
+                    <i class="bi bi-crop me-1"></i> Crop Foto
+                </button>
+                <?php endif; ?>
+
+                <!-- Form Unggah Foto -->
+                <form action="" method="POST" enctype="multipart/form-data" class="mb-3">
+                    <input type="hidden" name="action" value="upload">
+                    <input type="hidden" name="slot" value="<?= $slot ?>">
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold mb-1">Foto</label>
+                        <input type="file" name="hero_image" class="form-control form-control-sm" accept="image/jpeg,image/png,image/webp" required style="border-radius: 8px;">
+                    </div>
+                    <button type="submit" class="btn btn-sm w-100 fw-semibold" style="background: var(--color-primary); color: #fff; border-radius: 8px;">
+                        <i class="bi bi-upload me-1"></i> <?= !empty($file) ? 'Unggah Foto Baru' : 'Unggah Foto' ?>
+                    </button>
+                </form>
+
+                <!-- Form Teks Keterangan -->
+                <form action="" method="POST" class="mb-2">
+                    <input type="hidden" name="action" value="simpan_caption">
+                    <input type="hidden" name="slot" value="<?= $slot ?>">
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold mb-1" for="caption_<?= $slot ?>">Teks Keterangan</label>
+                        <textarea name="caption" id="caption_<?= $slot ?>" class="form-control form-control-sm" rows="2" maxlength="160" placeholder="Contoh: Benteng Kalamata, Ternate — kota tempat sekolah ini berdiri" style="border-radius: 8px;"><?= e($caption) ?></textarea>
+                        <div class="form-text small">Maksimal 160 karakter. Kosongkan bila tidak ingin menampilkan teks.</div>
+                    </div>
+                    <button type="submit" class="btn btn-sm w-100 fw-semibold" style="border: 1px solid var(--color-primary); color: var(--color-primary); background: transparent; border-radius: 8px;">
+                        <i class="bi bi-save me-1"></i> Simpan Teks Keterangan
+                    </button>
+                </form>
+
+                <?php if (!empty($file)): ?>
+                <form action="" method="POST">
+                    <input type="hidden" name="action" value="hapus">
+                    <input type="hidden" name="slot" value="<?= $slot ?>">
+                    <button type="submit" class="btn btn-sm btn-outline-danger w-100" style="border-radius: 8px;" onclick="return confirm('Hapus foto dan teks keterangan ini?');">
+                        <i class="bi bi-trash me-1"></i> Hapus Foto &amp; Teks
+                    </button>
+                </form>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</div>
+
 <div class="card card-modern bg-white mt-4" style="border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
     <div class="card-body p-4">
         <h6 class="fw-bold mb-2" style="color: var(--color-primary);"><i class="bi bi-info-circle me-1"></i>Catatan</h6>
@@ -269,8 +440,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
             <li>Format yang diizinkan: JPG, PNG, WebP. Maksimal 3 MB per foto.</li>
             <li><strong>Unggah Foto Baru</strong>: pilih berkas lalu klik Unggah — foto langsung disimpan (otomatis dikompres agar ringan).</li>
             <li><strong>Crop Foto</strong>: hanya muncul jika slot sudah berisi foto. Klik untuk membuka kotak crop, geser/perbesar area sesuai keinginan, lalu klik <strong>Gunakan Hasil Crop &amp; Unggah</strong> — hasil crop otomatis menggantikan foto lama.</li>
-            <li>Rasio crop mengikuti tampilan banner hero, sehingga foto selalu pas saat ditampilkan di beranda.</li>
-            <li>Jika semua slot kosong, hero beranda kembali memakai tampilan gradien bawaan.</li>
+            <li>Rasio crop slideshow hero mengikuti tampilan banner (16:6), sedangkan foto &amp; keterangan memakai rasio 4:3.</li>
+            <li><strong>Teks Keterangan</strong> disimpan terpisah dari foto — Anda bisa mengubah teks tanpa mengunggah ulang fotonya.</li>
+            <li>Jika semua slot hero kosong, banner beranda kembali memakai tampilan gradien bawaan.</li>
+            <li>Jika semua foto &amp; keterangan kosong, bagian beranda menampilkan video bawaan (Benteng Kalamata).</li>
         </ul>
     </div>
 </div>
@@ -280,7 +453,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content" style="border-radius: 16px;">
             <div class="modal-header border-bottom-0 pb-0">
-                <h6 class="modal-title fw-bold" id="cropModalLabel" style="color: var(--color-primary);"><i class="bi bi-crop me-1"></i>Crop Foto Hero</h6>
+                <h6 class="modal-title fw-bold" id="cropModalLabel" style="color: var(--color-primary);"><i class="bi bi-crop me-1"></i>Crop Foto</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body pt-2">
@@ -317,9 +490,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    var ASPECT = 16 / 6; /* rasio banner hero */
+    var DEFAULT_ASPECT = 16 / 6; /* rasio banner hero */
     var cropper = null;
     var activeSlot = null;
+    var activeAspect = DEFAULT_ASPECT;
 
     var modalEl = document.getElementById('cropModal');
     var cropModal = new bootstrap.Modal(modalEl);
@@ -336,6 +510,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (cropper) { cropper.destroy(); cropper = null; }
         cropImage.removeAttribute('src');
         activeSlot = null;
+        activeAspect = DEFAULT_ASPECT;
         resetSaveBtn();
     });
 
@@ -343,6 +518,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.hero-recrop-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             activeSlot = btn.getAttribute('data-slot');
+            var aspectAttr = btn.getAttribute('data-aspect');
+            activeAspect = aspectAttr ? parseFloat(aspectAttr) : DEFAULT_ASPECT;
+            if (!activeAspect || isNaN(activeAspect)) activeAspect = DEFAULT_ASPECT;
             cropImage.src = btn.getAttribute('data-src');
             cropModal.show();
         });
@@ -354,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function initCropper() {
             cropper = new Cropper(cropImage, {
-                aspectRatio: ASPECT,
+                aspectRatio: activeAspect,
                 viewMode: 1,
                 autoCropArea: 1,
                 responsive: true,

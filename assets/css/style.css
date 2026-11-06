@@ -69,6 +69,9 @@
     /* --- Margin luar yang sama di setiap lebar --- */
     --gutter: clamp(20px, 3.2vw, 48px);
 
+    /* --- Tinggi navbar lengket (diperbarui JS) agar elemen sticky tidak tertutup --- */
+    --nav-h: 72px;
+
     /* --- Sinkronisasi Bootstrap --- */
     --bs-primary: #2A4D88;
     --bs-primary-rgb: 42, 77, 136;
@@ -91,6 +94,7 @@ html {
     text-size-adjust: 100%;
     touch-action: manipulation;
     scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--nav-h) + 16px);
 }
 
 body {
@@ -849,7 +853,7 @@ body.landing h1.hero-title {
 
 .ed-feat-heading {
     position: sticky;
-    top: 32px;
+    top: calc(var(--nav-h) + 24px);
     font-size: var(--fs-heading);
     font-weight: 800;
     letter-spacing: -0.03em;
@@ -1002,6 +1006,46 @@ body.landing h1.hero-title {
 }
 
 /* ==========================================================
+ * FOTO & KETERANGAN BERANDA — slideshow bergantian (fade)
+ * Tiap slide membawa foto + teks keterangan di bawahnya.
+ * ========================================================== */
+.ed-gallery {
+    position: relative;
+    background: var(--field);
+}
+
+.ed-gal-slideshow {
+    position: relative;
+    width: 100%;
+    height: clamp(280px, 56vh, 560px);
+    overflow: hidden;
+}
+
+.ed-gal-slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+}
+
+.ed-gal-slide.is-active { opacity: 1; }
+
+.ed-gal-caption {
+    position: absolute;
+    left: var(--gutter);
+    bottom: 1rem;
+    max-width: min(90%, 560px);
+    color: var(--field-ink);
+    background: var(--field);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 0.8rem;
+    font-size: var(--fs-small);
+    line-height: 1.5;
+}
+
+/* ==========================================================
  * KATALOG — day tabs, banded agenda
  * ========================================================== */
 .ed-list {
@@ -1108,7 +1152,7 @@ body.landing h1.hero-title {
     flex-direction: column;
     gap: 6px;
     position: sticky;
-    top: 32px;
+    top: calc(var(--nav-h) + 24px);
 }
 
 .ed-tab {
@@ -1903,7 +1947,7 @@ body.landing .app-content > .container {
 
     .ed-feat-heading {
         position: sticky;
-        top: 0;
+        top: var(--nav-h);
         z-index: 5;
         background: var(--field);
         font-size: min(9vw, 56px);
@@ -1945,7 +1989,7 @@ body.landing .app-content > .container {
     .ed-tabs {
         flex-direction: row;
         position: sticky;
-        top: 0;
+        top: var(--nav-h);
         z-index: 5;
         gap: 6px;
         background: var(--ground);

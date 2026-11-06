@@ -27,24 +27,21 @@ body.login-body {
     min-height: 100svh;
 }
 
-/* ========== Panel Kiri: foto sekolah + scrim datar ========== */
+/* ========== Panel Kiri: gradien biru + elemen bulat ========== */
 .login-welcome {
     position: relative;
     flex: 0 0 44%;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     padding: clamp(2rem, 4vw, 3.5rem);
     overflow: hidden;
     color: #ffffff;
-    background: #2A4D88 url('../img/school-visit.webp') center / cover no-repeat;
-}
-
-/* Scrim netral di atas foto (satu warna, bukan gradien) */
-.login-welcome::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(14, 29, 46, 0.66);
+    background:
+        radial-gradient(circle 72px at 82% 60%, rgba(190, 218, 246, 0.72), rgba(190, 218, 246, 0.34) 60%, rgba(190, 218, 246, 0.10) 84%, rgba(190, 218, 246, 0) 100%),
+        radial-gradient(circle 145px at 98% 3%, rgba(118, 162, 214, 0.92) 97%, rgba(118, 162, 214, 0) 100%),
+        radial-gradient(circle 215px at 76% 110%, rgba(112, 156, 210, 0.90) 97%, rgba(112, 156, 210, 0) 100%),
+        radial-gradient(circle 250px at 13% 87%, rgba(120, 164, 216, 0.92) 97%, rgba(120, 164, 216, 0) 100%),
+        linear-gradient(160deg, #3664A4 0%, #2C5393 52%, #254980 100%);
 }
 
 .login-welcome-content {
@@ -54,33 +51,40 @@ body.login-body {
 }
 
 .login-logo {
-    width: 72px;
-    height: 72px;
+    width: 84px;
+    height: 84px;
     background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 10px 28px rgba(10, 24, 48, 0.28);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
-    margin-bottom: 1.5rem;
+    padding: 10px;
+    margin-bottom: 1.75rem;
 }
 .login-logo img { width: 100%; height: 100%; object-fit: contain; }
 
 .login-welcome h1 {
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
-    font-size: clamp(2.2rem, 3.4vw, 3.2rem);
-    letter-spacing: -0.02em;
-    margin: 0 0 0.75rem;
-    line-height: 1.08;
+    font-size: clamp(2.6rem, 4.6vw, 4rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.45rem;
+    line-height: 1;
     color: #ffffff;
 }
 
 .login-welcome p {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.05rem;
-    line-height: 1.65;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1rem, 1.7vw, 1.5rem);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    line-height: 1.4;
     margin: 0;
-    max-width: 38ch;
+    max-width: none;
 }
 
 /* ========== Panel Kanan: Form ========== */
@@ -126,32 +130,33 @@ body.login-body {
     color: #14663B;
 }
 
-/* Tab Peran (Guru / Admin) — kotak, satu bentuk */
+/* Tab Peran (Guru / Admin) — kotak berbingkai */
 .role-tabs {
     display: flex;
-    gap: 4px;
-    background: #EDF1F7;
-    padding: 4px;
-    border-radius: var(--radius-md);
+    gap: 8px;
+    background: #F1F5FA;
+    padding: 6px;
+    border-radius: var(--radius-lg);
     margin-bottom: 1.25rem;
 }
 .role-tab {
     flex: 1;
-    border: 0;
+    border: 1px solid #CBD5E1;
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: #ffffff;
     color: #4A5A73;
     font-family: inherit;
     font-size: 0.95rem;
     font-weight: 700;
-    padding: 0.7rem 0.5rem;
+    padding: 0.72rem 0.5rem;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
-.role-tab:hover { color: #0E1D2E; }
+.role-tab:hover { color: #0E1D2E; border-color: #94A3B8; }
 .role-tab.is-active {
-    background: #2A4D88;
-    color: #ffffff;
+    background: #ffffff;
+    border-color: #2A4D88;
+    color: #2A4D88;
 }
 
 /* Input bergaya referensi: ikon di dalam, latar abu muda */
@@ -231,21 +236,32 @@ body.login-body {
 }
 .btn-signin.btn-ghost:hover { background: #F4F7FB; color: #16305A; }
 
-/* Pemisah tanpa garis: jarak dan nada yang memisahkan */
+/* Pemisah "atau" dengan garis tipis di kedua sisi */
 .login-divider {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
     text-align: center;
-    color: #7A8699;
-    font-size: 0.9rem;
+    color: #8593A8;
+    font-size: 0.88rem;
     margin: 1.4rem 0 1rem;
+}
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #E2E8F1;
 }
 
 .demo-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #4A5A73;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7A8699;
     text-align: center;
-    margin-bottom: 0.7rem;
+    margin-bottom: 0.75rem;
 }
 
 .demo-grid {
@@ -254,8 +270,8 @@ body.login-body {
     gap: 0.7rem;
 }
 .btn-demo {
-    border: 0;
-    background: #EDF1F7;
+    border: 1px solid #D8DEE9;
+    background: #ffffff;
     color: #16294A;
     border-radius: var(--radius-md);
     padding: 0.75rem 0.5rem;
@@ -263,9 +279,9 @@ body.login-body {
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
-.btn-demo:hover { background: #E0E7F1; }
+.btn-demo:hover { background: #F6F8FB; border-color: #C9D4E6; }
 
 .login-register {
     text-align: center;
@@ -318,6 +334,10 @@ body.login-body {
         margin: 0 auto;
     }
     .login-logo { margin-inline: auto; }
-    .login-welcome p { margin-inline: auto; }
+    .login-welcome p {
+        margin-inline: auto;
+        text-align: center;
+        max-width: 34ch;
+    }
     .login-panel { padding: 2.4rem 1.25rem 3rem; }
 }
