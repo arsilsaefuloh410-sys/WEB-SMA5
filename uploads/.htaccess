@@ -1,7 +1,15 @@
-# Nonaktifkan eksekusi skrip PHP di folder unggahan demi keamanan
-<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|phps|cgi|pl|exe)$">
-    Order Deny,Allow
-    Deny from all
-</FilesMatch>
-
-Options -Indexes -ExecCGI
+# Nonaktifkan eksekusi skrip di folder unggahan demi keamanan.
+# Hindari direktif "Options" agar tidak 500 bila AllowOverride terbatas.
+# (Apache 2.4)
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|exe|jsp|asp|aspx)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+# Fallback Apache 2.2
+<IfModule !mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|exe|jsp|asp|aspx)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>

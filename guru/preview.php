@@ -37,7 +37,7 @@ $full_path = realpath(__DIR__ . '/../' . ltrim($file['path_file'], '/'));
 $upload_root = realpath(UPLOAD_DIR);
 
 if ($full_path === false || $upload_root === false
-    || !str_starts_with($full_path, $upload_root . DIRECTORY_SEPARATOR)
+    || strpos($full_path, $upload_root . DIRECTORY_SEPARATOR) !== 0
     || !is_file($full_path)) {
     header('HTTP/1.1 404 Not Found');
     exit('Berkas fisik materi belum tersedia di server.');

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Halaman Verifikasi Email Pendaftaran (Langkah 2)
  * Dibuka melalui tautan yang dikirim ke email pendaftar. Token divalidasi,
@@ -79,7 +79,7 @@ if (!$reg_row) {
 
             $token_valid = false;
             $success_message = 'Email berhasil diverifikasi dan akun <strong>' . e($reg_email) . '</strong> telah dibuat. '
-                . 'Akun Anda berstatus <strong>menunggu persetujuan administrator</strong> â€” '
+                . 'Akun Anda berstatus <strong>menunggu persetujuan administrator</strong> — '
                 . 'Anda baru dapat masuk setelah akun diaktifkan. Silakan hubungi administrator sekolah.';
         } catch (PDOException $ex) {
             error_log('[REGISTER VERIFY ERROR] ' . $ex->getMessage());

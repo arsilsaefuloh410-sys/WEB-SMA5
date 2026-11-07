@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Halaman Pencarian Materi Informatika
  * UI minimal: satu baris pencarian + filter dropdown, hasil langsung di bawah.
@@ -193,7 +193,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="container pt-3 pb-4">
 
     <h4 class="fw-bold mb-1" style="color: var(--color-primary);">Cari Bahan Ajar</h4>
-    <p class="hasil-ringkas mb-3">Ketik kata kunci â€” hasil tampil otomatis.</p>
+    <p class="hasil-ringkas mb-3">Ketik kata kunci — hasil tampil otomatis.</p>
 
     <!-- Bar Pencarian + Filter -->
     <form action="<?= base_url('guru/search.php') ?>" method="GET" id="formCari" class="pencarian-bar mb-4">
@@ -262,7 +262,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <h6>
                             <a href="<?= base_url('guru/topik.php?id=' . $topik['id']) ?>"><?= e($topik['judul_topik']) ?></a>
                         </h6>
-                        <p><?= e(mb_substr($topik['deskripsi'] ?? '', 0, 140)) ?><?= mb_strlen($topik['deskripsi'] ?? '') > 140 ? 'â€¦' : '' ?></p>
+                        <p><?= e(mb_substr($topik['deskripsi'] ?? '', 0, 140)) ?><?= mb_strlen($topik['deskripsi'] ?? '') > 140 ? '…' : '' ?></p>
                         <div class="d-flex align-items-center gap-3 mt-2 small" style="color: var(--text-light);">
                             <span><i class="bi bi-file-earmark me-1" style="color: #ea580c;"></i><?= (int) $topik['total_file'] ?> berkas</span>
                             <span><i class="bi bi-link-45deg me-1" style="color: var(--color-primary);"></i><?= (int) $topik['total_referensi'] ?> referensi</span>

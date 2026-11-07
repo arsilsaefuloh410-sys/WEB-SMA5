@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Kelola Akun Pengguna (Administrator & Guru)
  * Admin memiliki hak akses penuh membuat akun baru, memverifikasi akun guru, dan menentukan peran.
@@ -480,10 +480,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                                 <label class="form-label small fw-semibold text-primary">Pilihan Peran (Role Pengguna)</label>
                                                 <select name="role" class="form-select border-primary" <?= $is_self ? 'disabled' : '' ?> required>
                                                     <option value="guru" <?= $u['role'] === 'guru' ? 'selected' : '' ?>>
-                                                        ðŸ‘¨â€ðŸ« Guru Pengajar (Hanya Mengakses & Mengunduh Materi)
+                                                        👨‍👫 Guru Pengajar (Hanya Mengakses & Mengunduh Materi)
                                                     </option>
                                                     <option value="admin" <?= $u['role'] === 'admin' ? 'selected' : '' ?>>
-                                                        ðŸ›¡ï¸ Administrator (Akses Penuh CRUD Materi & Akun)
+                                                        🛡️ Administrator (Akses Penuh CRUD Materi & Akun)
                                                     </option>
                                                 </select>
                                                 <?php if ($is_self): ?>
@@ -586,10 +586,10 @@ require_once __DIR__ . '/../includes/admin_header.php';
                         <label class="form-label small fw-semibold text-primary">Pilihan Peran (Role Akun)</label>
                         <select name="role" class="form-select border-primary fw-semibold" required>
                             <option value="guru" selected>
-                                ðŸ‘¨â€ðŸ« Guru Pengajar (Hanya Dapat Mengakses & Mengunduh Materi)
+                                👨‍👫 Guru Pengajar (Hanya Dapat Mengakses & Mengunduh Materi)
                             </option>
                             <option value="admin">
-                                ðŸ›¡ï¸ Administrator (Akses Penuh CRUD Materi & Akun)
+                                🛡️ Administrator (Akses Penuh CRUD Materi & Akun)
                             </option>
                         </select>
                         <div class="alert alert-light border small mt-2 py-2 mb-0">

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Halaman Detail Topik / Materi Ajar Lengkap
  * Berisi Deskripsi, Berkas PPT/PDF, dan Tautan Referensi
@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="text-muted small">
                     <i class="bi bi-calendar3 me-1"></i> Ditambahkan pada <?= date('d M Y', strtotime($topik['created_at'])) ?>
                     <?php if (!empty($topik['nama_pembuat'])): ?>
-                        â€¢ Oleh <span class="fw-medium text-dark"><?= e($topik['nama_pembuat']) ?></span>
+                        • Oleh <span class="fw-medium text-dark"><?= e($topik['nama_pembuat']) ?></span>
                     <?php endif; ?>
                 </div>
             </div>
@@ -183,7 +183,7 @@ require_once __DIR__ . '/../includes/header.php';
                                         <span class="badge rounded-pill <?= $badge['bg'] ?>"><?= $badge['label'] ?></span>
                                         <span><i class="bi bi-hdd me-1"></i><?= format_bytes($file['ukuran_file']) ?></span>
                                         <span><i class="bi bi-download me-1"></i><?= (int)($file['download_count'] ?? 0) ?>x diunduh</span>
-                                        <span>â€¢ Diunggah <?= date('d/m/Y', strtotime($file['uploaded_at'])) ?></span>
+                                        <span>• Diunggah <?= date('d/m/Y', strtotime($file['uploaded_at'])) ?></span>
                                     </div>
                                 </div>
                             </div>

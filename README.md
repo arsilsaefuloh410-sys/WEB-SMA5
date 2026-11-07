@@ -31,8 +31,8 @@ Aplikasi telah dilengkapi akun percobaan siap pakai:
 
 | Peran (Role) | Alamat Email | Kata Sandi | Kegunaan |
 |---|---|---|---|
-| **Admin MGMP** | `admin@sma5.sch.id` | `admin123` | Mengelola kelas, bab topik, unggah modul/slide, kelola akun guru |
-| **Guru Pengajar** | `guru@sma5.sch.id` | `guru123` | Menjelajahi materi, mengunduh berkas, membuka tautan referensi |
+| **Admin MGMP** | `admin@sma5.sch.id` | `MgmpInformatika2026!` | Mengelola kelas, bab topik, unggah modul/slide, kelola akun guru |
+| **Guru Pengajar** | `guru@sma5.sch.id` | `GuruInformatika2026!` | Menjelajahi materi, mengunduh berkas, membuka tautan referensi |
 
 > *Catatan: Pada halaman login tersedia tombol klik otomatis untuk mengisi akun demo di atas tanpa perlu mengetik manual.*
 >
@@ -70,6 +70,51 @@ Buka browser dan akses alamat berikut:
 http://localhost/bahan-ajar-informatika/
 ```
 *(Jika folder bernama lain di htdocs, sesuaikan nama foldernya di URL)*.
+
+---
+
+## 🌐 Panduan Deployment ke Hosting Online
+
+Lokal (XAMPP) dan hosting online punya konfigurasi berbeda. Ikuti langkah berikut agar aplikasi tidak error saat di-hosting:
+
+### Langkah 1: Persyaratan Server
+- **PHP ≥ 7.4** (disarankan 8.0/8.1/8.2) dengan ekstensi: `pdo_mysql`, `mbstring`, `gd`
+- **MySQL/MariaDB** dengan hak CREATE/INSERT/SELECT/UPDATE/DELETE pada database Anda
+- **Apache** dengan `AllowOverride` mengizinkan `FileInfo` (agar `.htaccess` berfungsi), atau **Nginx** (lihat catatan di bawah)
+
+### Langkah 2: Buat Database via Panel Hosting
+1. Buat database + user baru melalui cPanel/Plesk (shared hosting biasanya melarang `CREATE DATABASE` lewat SQL).
+2. Catat: **nama database**, **username**, **password**.
+
+### Langkah 3: Impor `database.sql`
+1. Buka phpMyAdmin panel hosting → pilih database Anda → tab **Import**.
+2. Pilih `database.sql` → **Go**.
+
+### Langkah 4: Siapkan `.env`
+1. Salin `.env.example` menjadi `.env` di root aplikasi.
+2. Isi kredensial database:
+   ```env
+   DB_HOST=localhost
+   DB_USER=nama_user_anda
+   DB_PASS=password_anda
+   DB_NAME=nama_database_anda
+   ```
+3. **Penting:** `.env` tidak ikut repository Git — unggah manual via FTP/File Manager.
+4. Isi `MAIL_*` bila ingin fitur lupa-password/verifikasi email aktif.
+5. Set `APP_DEBUG=false` di produksi. Set `TRUSTED_PROXY=true` hanya bila memakai Cloudflare/proxy.
+
+### Langkah 5: Upload Berkas
+- Upload seluruh folder aplikasi (termasuk `.env`, `.htaccess`, `.user.ini` bila ada).
+- Pastikan folder `uploads/materi/` dan `uploads/hero/` **writable** oleh web server (chmod 755, atau 775 bila shared hosting menuntut).
+- Salin `.user.ini.example` menjadi `.user.ini` di root lalu sesuaikan — ini menaikkan batas upload PHP ke 20 MB.
+
+### Langkah 6: Ganti Password Bawaan
+Segera ganti password akun demo melalui menu **Kelola Akun Pengguna** (admin) setelah login pertama.
+
+### Catatan Khusus
+- **Nginx:** seluruh `.htaccess` diabaikan. Tambahkan manual blok larangan akses ke `.env` dan eksekusi PHP di folder `uploads/` pada konfigurasi server.
+- **CDN:** Bootstrap, Bootstrap Icons, Google Fonts, dan Cropper.js dimuat dari CDN — situs membutuhkan akses internet di sisi browser.
+- **SMTP:** beberapa hosting memblokir port keluar 587; bila email gagal, gunakan port alternatif atau layanan email hosting.
 
 ---
 

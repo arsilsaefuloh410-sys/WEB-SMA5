@@ -1,4 +1,19 @@
-# Blokir akses HTTP ke berkas konfigurasi rahasia
-<FilesMatch "(?i)^(\.env|\.env\..*|\.git.*|composer\.(json|lock))$">
-    Require all denied
-</FilesMatch>
+# Blokir akses HTTP ke berkas konfigurasi rahasia.
+# Dua sintaks disediakan agar tidak 500 di Apache 2.2 maupun 2.4.
+# Catatan: di Nginx seluruh .htaccess diabaikan — blok .env harus
+# ditambahkan manual di konfigurasi server.
+
+# --- Apache 2.4 ---
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)^(\.env|\.env\..*|\.git.*|composer\.(json|lock))$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# --- Fallback Apache 2.2 ---
+<IfModule !mod_authz_core.c>
+    <FilesMatch "(?i)^(\.env|\.env\..*|\.git.*|composer\.(json|lock))$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Kelola Foto Beranda (Admin)
  * 1. Foto hero: 3 slot latar belakang slideshow yang bergantian (fade in/out).
@@ -62,7 +62,7 @@ function get_gallery_items(PDO $pdo): array {
             }
         }
     } catch (Exception $e) {
-        // Tabel pengaturan belum ada â€” biarkan kosong
+        // Tabel pengaturan belum ada — biarkan kosong
     }
     return $items;
 }
@@ -134,12 +134,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Jalur ringan: resize + konversi WebP (hanya jika ekstensi GD aktif)
                         [$imgW, $imgH] = $imgInfo;
                         $imgMime = $imgInfo['mime'];
-                        $srcImg = match ($imgMime) {
-                            'image/jpeg' => @imagecreatefromjpeg($srcTmp),
-                            'image/png'  => @imagecreatefrompng($srcTmp),
-                            'image/webp' => @imagecreatefromwebp($srcTmp),
-                            default => null,
-                        };
+                        $srcImg = null;
+                        if ($imgMime === 'image/jpeg') {
+                            $srcImg = @imagecreatefromjpeg($srcTmp);
+                        } elseif ($imgMime === 'image/png') {
+                            $srcImg = @imagecreatefrompng($srcTmp);
+                        } elseif ($imgMime === 'image/webp') {
+                            $srcImg = @imagecreatefromwebp($srcTmp);
+                        }
                         if ($srcImg) {
                             $newW = min($imgW, HERO_MAX_WIDTH);
                             $newH = $imgH > 0 ? (int) round($imgH * $newW / $imgW) : (int) round($newW * 9 / 16);
@@ -378,12 +380,12 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 
 <!-- ==========================================================
- * FOTO & KETERANGAN BERANDA â€” 3 foto + teks di bawahnya
+ * FOTO & KETERANGAN BERANDA — 3 foto + teks di bawahnya
  * ========================================================== -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-3 mt-2 border-bottom">
     <div>
         <h6 class="fw-bold mb-1" style="color: var(--color-primary);"><i class="bi bi-card-image me-1"></i>Foto &amp; Keterangan Beranda</h6>
-        <p class="text-muted small mb-0">Maksimal 3 foto yang tampil berdampingan di beranda, masing-masing dengan <strong>teks keterangan</strong> di bawahnya. Isi foto dan teks secara terpisah â€” keduanya bisa diubah kapan saja.</p>
+        <p class="text-muted small mb-0">Maksimal 3 foto yang tampil berdampingan di beranda, masing-masing dengan <strong>teks keterangan</strong> di bawahnya. Isi foto dan teks secara terpisah — keduanya bisa diubah kapan saja.</p>
     </div>
 </div>
 
@@ -451,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <input type="hidden" name="slot" value="<?= $slot ?>">
                     <div class="mb-2">
                         <label class="form-label small fw-semibold mb-1" for="caption_<?= $slot ?>">Teks Keterangan</label>
-                        <textarea name="caption" id="caption_<?= $slot ?>" class="form-control form-control-sm" rows="2" maxlength="160" placeholder="Contoh: Benteng Kalamata, Ternate â€” kota tempat sekolah ini berdiri" style="border-radius: 8px;"><?= e($caption) ?></textarea>
+                        <textarea name="caption" id="caption_<?= $slot ?>" class="form-control form-control-sm" rows="2" maxlength="160" placeholder="Contoh: Benteng Kalamata, Ternate — kota tempat sekolah ini berdiri" style="border-radius: 8px;"><?= e($caption) ?></textarea>
                         <div class="form-text small">Maksimal 160 karakter. Kosongkan bila tidak ingin menampilkan teks.</div>
                     </div>
                     <button type="submit" class="btn btn-sm w-100 fw-semibold" style="border: 1px solid var(--color-primary); color: var(--color-primary); background: transparent; border-radius: 8px;">
@@ -480,10 +482,10 @@ document.addEventListener('DOMContentLoaded', function () {
         <h6 class="fw-bold mb-2" style="color: var(--color-primary);"><i class="bi bi-info-circle me-1"></i>Catatan</h6>
         <ul class="mb-0 small text-muted">
             <li>Format yang diizinkan: JPG, PNG, WebP. Maksimal 3 MB per foto.</li>
-            <li><strong>Unggah Foto Baru</strong>: pilih berkas lalu klik Unggah â€” foto langsung disimpan (otomatis dikompres agar ringan).</li>
-            <li><strong>Crop Foto</strong>: hanya muncul jika slot sudah berisi foto. Klik untuk membuka kotak crop, geser/perbesar area sesuai keinginan, lalu klik <strong>Gunakan Hasil Crop &amp; Unggah</strong> â€” hasil crop otomatis menggantikan foto lama.</li>
+            <li><strong>Unggah Foto Baru</strong>: pilih berkas lalu klik Unggah — foto langsung disimpan (otomatis dikompres agar ringan).</li>
+            <li><strong>Crop Foto</strong>: hanya muncul jika slot sudah berisi foto. Klik untuk membuka kotak crop, geser/perbesar area sesuai keinginan, lalu klik <strong>Gunakan Hasil Crop &amp; Unggah</strong> — hasil crop otomatis menggantikan foto lama.</li>
             <li>Rasio crop slideshow hero mengikuti tampilan banner (16:6), sedangkan foto &amp; keterangan memakai rasio 4:3.</li>
-            <li><strong>Teks Keterangan</strong> disimpan terpisah dari foto â€” Anda bisa mengubah teks tanpa mengunggah ulang fotonya.</li>
+            <li><strong>Teks Keterangan</strong> disimpan terpisah dari foto — Anda bisa mengubah teks tanpa mengunggah ulang fotonya.</li>
             <li>Jika semua slot hero kosong, banner beranda kembali memakai tampilan gradien bawaan.</li>
             <li>Jika semua foto &amp; keterangan kosong, bagian beranda menampilkan video bawaan (Benteng Kalamata).</li>
         </ul>
@@ -524,11 +526,11 @@ document.addEventListener('DOMContentLoaded', function () {
 /* Inisialisasi ditunda sampai DOM siap (Bootstrap bundle dimuat setelah skrip ini) */
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
-        console.error('Bootstrap JS belum termuat â€” fitur crop tidak aktif.');
+        console.error('Bootstrap JS belum termuat — fitur crop tidak aktif.');
         return;
     }
     if (typeof Cropper === 'undefined') {
-        console.error('Cropper.js belum termuat â€” fitur crop tidak aktif.');
+        console.error('Cropper.js belum termuat — fitur crop tidak aktif.');
         return;
     }
 

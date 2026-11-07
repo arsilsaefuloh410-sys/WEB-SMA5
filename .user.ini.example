@@ -1,0 +1,22 @@
+; ==========================================================
+; Konfigurasi PHP untuk hosting (salin ke .user.ini di root)
+; ==========================================================
+; Berlaku untuk PHP-FPM / CGI (shared hosting modern).
+; Jika hosting memakai mod_php, pindahkan baris ke php.ini.
+;
+; Aplikasi mengizinkan unggahan sampai 20 MB — samakan batas
+; PHP agar unggahan tidak gagal dengan UPLOAD_ERR_INI_SIZE.
+
+upload_max_filesize = 20M
+post_max_size = 25M
+max_file_uploads = 20
+max_execution_time = 60
+memory_limit = 256M
+
+; Wajib: ekstensi yang dipakai aplikasi
+extension = mbstring
+extension = pdo_mysql
+extension = gd
+
+; Zona waktu aplikasi (fallback bila date_default_timezone_set diblokir)
+date.timezone = Asia/Jakarta

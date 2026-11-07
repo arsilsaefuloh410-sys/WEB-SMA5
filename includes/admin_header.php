@@ -48,7 +48,7 @@ $current_user = current_user();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
 
     <!-- Gaya Kustom Palet #2A4D88, #B1BBC8, #D9D9D8 (versi=filemtime agar tidak terkena cache) -->
-    <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>?v=<?= @filemtime(__DIR__ . '/../assets/css/style.css') ?>">
 
     <!-- Terapkan preferensi mode gelap/terang pengguna sesegera mungkin (anti kedip) -->
     <script>

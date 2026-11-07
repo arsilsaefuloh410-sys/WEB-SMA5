@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Kelola Berkas Bahan Ajar & Link Referensi per Topik
  * Pengelolaan terpusat yang praktis dan tidak berbelit-belit untuk Admin
@@ -246,7 +246,7 @@ require_once __DIR__ . '/../includes/admin_header.php';
                                         <?= e($f['nama_file']) ?>
                                     </div>
                                     <small class="text-muted" style="font-size: 0.75rem;">
-                                        <?= format_bytes($f['ukuran_file']) ?> â€¢ <?= date('d/m/Y', strtotime($f['uploaded_at'])) ?>
+                                        <?= format_bytes($f['ukuran_file']) ?> • <?= date('d/m/Y', strtotime($f['uploaded_at'])) ?>
                                     </small>
                                 </div>
                             </div>

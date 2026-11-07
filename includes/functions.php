@@ -8,6 +8,22 @@
 
 require_once __DIR__ . '/config.php';
 
+// --- Polyfill mbstring (bila ekstensi tidak aktif di hosting) ---
+if (!function_exists('mb_strlen')) {
+    function mb_strlen($string, $encoding = null): int {
+        return count(preg_split('//u', (string)$string, -1, PREG_SPLIT_NO_EMPTY));
+    }
+}
+if (!function_exists('mb_substr')) {
+    function mb_substr($string, $start, $length = null, $encoding = null): string {
+        $chars = preg_split('//u', (string)$string, -1, PREG_SPLIT_NO_EMPTY);
+        if ($length === null) {
+            return implode('', array_slice($chars, (int)$start));
+        }
+        return implode('', array_slice($chars, (int)$start, (int)$length));
+    }
+}
+
 /**
  * Mencegah XSS (Cross Site Scripting) pada output HTML
  */
@@ -433,9 +449,22 @@ function validate_password_strength(string $password): array {
 }
 
 /**
- * Mendapatkan alamat IP klien (untuk pembatasan percobaan login)
+ * Mendapatkan alamat IP klien (untuk pembatasan percobaan login).
+ * Menghormati X-Forwarded-For hanya bila di belakang proxy tepercaya
+ * (ditandai TRUSTED_PROXY env / config). Tanpa itu, REMOTE_ADDR dipakai
+ * agar lockout tidak mengunci semua pengguna yang berbagi IP proxy.
  */
 function get_client_ip(): string {
+    if (defined('TRUSTED_PROXY') && TRUSTED_PROXY) {
+        $xff = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+        if ($xff !== '') {
+            $parts = explode(',', $xff);
+            $candidate = trim($parts[0]);
+            if (filter_var($candidate, FILTER_VALIDATE_IP)) {
+                return substr($candidate, 0, 45);
+            }
+        }
+    }
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     return substr($ip, 0, 45);
 }

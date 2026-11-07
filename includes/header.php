@@ -108,7 +108,7 @@ function render_nav_menu(string $suffix): void
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Gaya Kustom dengan Palet Warna #2A4D88, #B1BBC8, #D9D9D8 (versi=filemtime agar tidak terkena cache) -->
-    <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>?v=<?= @filemtime(__DIR__ . '/../assets/css/style.css') ?>">
 
     <!-- Terapkan preferensi mode gelap/terang pengguna sesegera mungkin (anti kedip) -->
     <script>

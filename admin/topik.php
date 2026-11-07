@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Kelola Daftar Topik / Bab Pembelajaran Informatika
  */

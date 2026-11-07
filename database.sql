@@ -161,14 +161,15 @@ CREATE TABLE `file_materi` (
 -- ==========================================================
 -- DATA AWAL (SEED DATA)
 -- Akun Login Bawaan:
--- 1. Admin: admin@sma5.sch.id / admin123
--- 2. Guru : guru@sma5.sch.id   / guru123
+-- 1. Admin: admin@sma5.sch.id / MgmpInformatika2026!
+-- 2. Guru : guru@sma5.sch.id   / GuruInformatika2026!
+-- GANTI password ini sebelum deployment produksi.
 -- ==========================================================
 
 INSERT INTO `users` (`id`, `nama`, `email`, `password`, `role`, `status`, `created_at`) VALUES
-(1, 'Administrator MGMP', 'admin@sma5.sch.id', '$2y$10$T9DUaBiGA/.jagFl1xCX.ee9NQVTBsCpoKgwc4C2iq2zIuT2anVDa', 'admin', 'aktif', NOW()),
-(2, 'Budi Prasetyo, S.Pd.', 'guru@sma5.sch.id', '$2y$10$Ae8mpdPcrsnO.YLMqGF8eOfGxoij69xPElymzuFqtVfG7WBMeknDS', 'guru', 'aktif', NOW()),
-(3, 'Siti Nurhaliza, S.Pd.', 'siti.guru@sma5.sch.id', '$2y$10$Ae8mpdPcrsnO.YLMqGF8eOfGxoij69xPElymzuFqtVfG7WBMeknDS', 'guru', 'aktif', NOW());
+(1, 'Administrator MGMP', 'admin@sma5.sch.id', '$2y$10$eBr4Xkpa66dA/OGO1hH3f.8H2hMyTwMoG86Ej407hOylUJr5vkkfS', 'admin', 'aktif', NOW()),
+(2, 'Budi Prasetyo, S.Pd.', 'guru@sma5.sch.id', '$2y$10$oR/yUMe1a4fw5AVou18brO1JkXy2kmAnR8escn9c6ryDBUCPN/6ce', 'guru', 'aktif', NOW()),
+(3, 'Siti Nurhaliza, S.Pd.', 'siti.guru@sma5.sch.id', '$2y$10$oR/yUMe1a4fw5AVou18brO1JkXy2kmAnR8escn9c6ryDBUCPN/6ce', 'guru', 'aktif', NOW());
 
 -- --------------------------------------------------------
 -- DATA KELAS (10, 11, 12)

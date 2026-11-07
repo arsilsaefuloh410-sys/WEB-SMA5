@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Halaman Reset Kata Sandi
  * Dibuka melalui tautan yang dikirim ke email. Token divalidasi

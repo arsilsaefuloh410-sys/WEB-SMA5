@@ -43,6 +43,11 @@ define('APP_VERSION', '1.0.0');
 // Mode debug (true = pesan kesalahan detail + link reset ditampilkan bila email gagal)
 define('APP_DEBUG', filter_var($env['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
 
+// Set true hanya bila aplikasi berada di belakang proxy/CDN tepercaya
+// (Cloudflare, load balancer) agar lockout login membaca IP asli dari
+// X-Forwarded-For. Selain itu biarkan false/absen.
+define('TRUSTED_PROXY', filter_var($env['TRUSTED_PROXY'] ?? false, FILTER_VALIDATE_BOOLEAN));
+
 // Pengaturan Email (SMTP). Kosongkan MAIL_USERNAME untuk memakai mail() server.
 define('MAIL_HOST', $env['MAIL_HOST'] ?? 'smtp.gmail.com');
 define('MAIL_PORT', $env['MAIL_PORT'] ?? '587');

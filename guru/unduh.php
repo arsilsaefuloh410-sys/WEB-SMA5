@@ -33,7 +33,7 @@ $full_path = realpath(__DIR__ . '/../' . ltrim($file['path_file'], '/'));
 $upload_root = realpath(UPLOAD_DIR);
 
 if ($full_path === false || $upload_root === false
-    || !str_starts_with($full_path, $upload_root . DIRECTORY_SEPARATOR)
+    || strpos($full_path, $upload_root . DIRECTORY_SEPARATOR) !== 0
     || !is_file($full_path)) {
     set_flash('warning', 'Berkas fisik materi belum tersedia di server.');
     header('Location: ' . base_url('guru/topik.php?id=' . $file['topik_id']));

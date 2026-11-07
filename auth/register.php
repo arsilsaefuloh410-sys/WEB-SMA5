@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Pendaftaran Akun Guru Baru (Verifikasi Email + Persetujuan Admin)
  *

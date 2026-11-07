@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Halaman Lupa Kata Sandi
  * Pengguna memasukkan email terdaftar, lalu link reset dikirim via email.

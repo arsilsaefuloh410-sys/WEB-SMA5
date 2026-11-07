@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Halaman Masuk (Login)
  * Pilih peran (Guru / Admin) + akun demo, tampilan tetap simpel.
@@ -181,10 +181,10 @@ $is_admin_tab = $selected_role === 'admin';
             <div class="login-divider"><span>atau</span></div>
             <div class="demo-label"><i class="bi bi-lightning-charge-fill me-1" style="color:#2A4D88;"></i>Masuk cepat dengan akun demo</div>
             <div class="demo-grid">
-                <button type="button" class="btn-demo" onclick="selectRole('guru'); fillDemo('guru@sma5.sch.id', 'guru123');">
+                <button type="button" class="btn-demo" onclick="selectRole('guru'); fillDemo('guru@sma5.sch.id', 'GuruInformatika2026!');">
                     <i class="bi bi-person-fill me-1"></i> Guru
                 </button>
-                <button type="button" class="btn-demo" onclick="selectRole('admin'); fillDemo('admin@sma5.sch.id', 'admin123');">
+                <button type="button" class="btn-demo" onclick="selectRole('admin'); fillDemo('admin@sma5.sch.id', 'MgmpInformatika2026!');">
                     <i class="bi bi-shield-lock-fill me-1"></i> Admin
                 </button>
             </div>

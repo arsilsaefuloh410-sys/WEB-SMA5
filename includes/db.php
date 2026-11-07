@@ -4,7 +4,8 @@
  * Koneksi Basis Data PDO (MySQL)
  * ==========================================================
  * Menghubungkan aplikasi ke MySQL dengan prepared statement aman.
- * Memberikan panduan ramah jika MySQL di XAMPP belum aktif.
+ * Menampilkan panduan bila koneksi gagal — detail teknis hanya
+ * saat APP_DEBUG=true agar kredensial tidak bocor di produksi.
  */
 
 require_once __DIR__ . '/config.php';
@@ -16,14 +17,11 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
     ];
-    
+
     $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
 } catch (PDOException $e) {
-    // Tampilan bantuan jika koneksi database gagal di XAMPP
-    $errorCode = $e->getCode();
     $errorMsg = $e->getMessage();
-    
-    // Tampilkan halaman bantuan khusus bahasa Indonesia yang ramah
+    $isLocalHost = in_array(DB_HOST, ['localhost', '127.0.0.1'], true);
     ?>
     <!DOCTYPE html>
     <html lang="id">
@@ -54,26 +52,28 @@ try {
                 <div class="card-header bg-warning bg-opacity-25 border-0 pt-4 pb-3 text-center">
                     <i class="bi bi-database-fill-exclamation text-warning display-4"></i>
                     <h4 class="mt-2 text-dark font-weight-bold">Basis Data Belum Terhubung</h4>
-                    <p class="text-muted mb-0">Aplikasi belum dapat berkomunikasi dengan MySQL di komputer lokal (XAMPP).</p>
+                    <p class="text-muted mb-0">Aplikasi belum dapat terhubung ke MySQL.</p>
                 </div>
                 <div class="card-body p-4">
+                    <?php if (APP_DEBUG): ?>
                     <div class="alert alert-light border">
                         <small class="text-danger d-block font-monospace">Pesan Sistem: <?= htmlspecialchars($errorMsg) ?></small>
                     </div>
-                    
-                    <h6 class="fw-bold mb-3"><i class="bi bi-tools text-primary me-2"></i>Langkah Mudah Menyelesaikan:</h6>
+                    <?php endif; ?>
+
+                    <?php if ($isLocalHost): ?>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-tools text-primary me-2"></i>Langkah Mudah (XAMPP Lokal):</h6>
                     <ol class="list-group list-group-numbered mb-4">
                         <li class="list-group-item border-0 ps-0">
-                            <strong>Buka aplikasi XAMPP Control Panel:</strong> Pastikan tombol <span class="badge bg-success">Start</span> pada baris <strong>MySQL</strong> sudah diklik hingga berwarna hijau.
+                            <strong>Buka XAMPP Control Panel:</strong> Pastikan tombol <span class="badge bg-success">Start</span> pada baris <strong>MySQL</strong> sudah aktif.
                         </li>
                         <li class="list-group-item border-0 ps-0">
-                            <strong>Buka phpMyAdmin di browser:</strong> Kunjungi tautan <a href="http://localhost/phpmyadmin" target="_blank" class="fw-bold">http://localhost/phpmyadmin</a>.
+                            <strong>Buka phpMyAdmin:</strong> Kunjungi <a href="http://localhost/phpmyadmin" target="_blank" class="fw-bold">http://localhost/phpmyadmin</a>.
                         </li>
                         <li class="list-group-item border-0 ps-0">
-                            <strong>Impor Database:</strong> Klik tab <em>Import</em> di phpMyAdmin, pilih file <span class="badge bg-secondary">database.sql</span> yang ada di dalam folder aplikasi ini, lalu klik <em>Go/Kirim</em>.
+                            <strong>Impor Database:</strong> Tab <em>Import</em>, pilih <span class="badge bg-secondary">database.sql</span>, lalu klik <em>Go</em>.
                         </li>
                     </ol>
-
                     <div class="d-flex justify-content-between align-items-center pt-2">
                         <a href="http://localhost/phpmyadmin" target="_blank" class="btn btn-outline-primary">
                             <i class="bi bi-box-arrow-up-right me-1"></i> Buka phpMyAdmin
@@ -82,6 +82,25 @@ try {
                             <i class="bi bi-arrow-clockwise me-1"></i> Muat Ulang Halaman
                         </button>
                     </div>
+                    <?php else: ?>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-tools text-primary me-2"></i>Langkah Mudah (Hosting):</h6>
+                    <ol class="list-group list-group-numbered mb-4">
+                        <li class="list-group-item border-0 ps-0">
+                            <strong>Buat database</strong> melalui panel hosting (cPanel/Plesk), catat nama database, user, dan password-nya.
+                        </li>
+                        <li class="list-group-item border-0 ps-0">
+                            <strong>Impor <span class="badge bg-secondary">database.sql</span></strong> lewat phpMyAdmin panel hosting.
+                        </li>
+                        <li class="list-group-item border-0 ps-0">
+                            <strong>Salin <span class="badge bg-secondary">.env.example</span> menjadi <span class="badge bg-secondary">.env</span> di root aplikasi</strong>, lalu isi <code>DB_HOST</code>, <code>DB_USER</code>, <code>DB_PASS</code>, <code>DB_NAME</code> sesuai kredensial hosting.
+                        </li>
+                    </ol>
+                    <div class="d-flex justify-content-end pt-2">
+                        <button onclick="window.location.reload();" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Muat Ulang Halaman
+                        </button>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
