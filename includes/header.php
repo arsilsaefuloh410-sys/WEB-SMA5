@@ -97,6 +97,11 @@ function render_nav_menu(string $suffix): void
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <!-- Pra-muat foto hero slide pertama (beranda) agar tidak terlihat latar biru saat awal muat -->
+    <?php if (!empty($heroSlides)): ?>
+    <link rel="preload" as="image" href="<?= e(base_url($heroSlides[0])) ?>" fetchpriority="high">
+    <?php endif; ?>
+
     <!-- Gaya Kustom dengan Palet Warna #2A4D88, #B1BBC8, #D9D9D8 (versi=filemtime agar tidak terkena cache) -->
     <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>?v=<?= @filemtime(__DIR__ . '/../assets/css/style.css') ?>">
 
@@ -168,7 +173,6 @@ function render_nav_menu(string $suffix): void
                 </div>
                 <div class="d-flex flex-column lh-1 min-width-0">
                     <span class="fs-6 fw-bold text-dark text-nowrap nav-title-long" style="font-size: 0.95rem;">Portal Bahan Ajar Informatika</span>
-                    <span class="fs-6 fw-bold text-dark text-nowrap nav-title-short" style="font-size: 0.95rem;">Portal Informatika</span>
                     <small class="fw-semibold text-nowrap mt-1 d-none d-sm-block" style="font-size: 0.8125rem; color: var(--color-primary);">
                         <i class="bi bi-geo-alt-fill me-1" style="color: var(--color-accent);"></i>SMAN 5 Kota Ternate
                     </small>

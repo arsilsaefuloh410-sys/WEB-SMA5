@@ -57,19 +57,25 @@ $current_user = current_user();
 <body style="background-color: var(--bg-body);">
 
     <!-- Navbar Atas Admin -->
-    <header class="navbar navbar-expand-lg sticky-top px-3 py-2 shadow-sm" style="background-color: var(--color-primary); border-bottom: 1px solid rgba(177, 187, 200, 0.2);">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center gap-2 text-white" href="<?= base_url('admin/index.php') ?>">
+    <header class="navbar navbar-expand-lg sticky-top px-3 py-2 shadow-sm admin-topbar" style="background-color: var(--color-primary); border-bottom: 1px solid rgba(177, 187, 200, 0.2);">
+    <div class="sidebar-backdrop"></div>
+
+    <div class="container-fluid">
+        <!-- Tombol Laci Menu (hanya layar sempit; di desktop sidebar statis seperti biasa) -->
+        <button class="sidebar-toggle d-md-none me-2" type="button" aria-label="Buka atau tutup menu sidebar" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(183,215,234,0.3); border-radius: 50%;">
+            <i class="bi bi-list"></i>
+        </button>
+        <a class="navbar-brand d-flex align-items-center gap-2 text-white" href="<?= base_url('admin/index.php') ?>">
                 <div class="brand-icon-box" style="width:36px; height:36px; background:transparent; border:none;">
                     <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;padding:2px;box-sizing:border-box;">
                 </div>
                 <div class="d-flex flex-column min-width-0">
                     <span class="fs-6 fw-bold lh-1 text-white" style="font-size: 0.95rem;">Admin Bahan Ajar</span>
-                    <small class="d-none d-sm-block" style="color: var(--color-accent); font-size: 0.72rem;">Pengelola Konten Informatika • <?= APP_SCHOOL ?></small>
+                    <small class="d-none d-lg-block" style="color: var(--color-accent); font-size: 0.72rem;">Pengelola Konten Informatika • <?= APP_SCHOOL ?></small>
                 </div>
             </a>
 
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3 admin-actions">
                 <!-- Tombol Mode Gelap / Terang -->
                 <button class="theme-toggle btn btn-sm d-inline-flex align-items-center justify-content-center" type="button" aria-label="Aktifkan mode gelap" title="Mode Gelap / Terang" style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(183,215,234,0.3);">
                     <i class="bi bi-moon-stars"></i>
@@ -101,7 +107,7 @@ $current_user = current_user();
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar Navigasi Admin -->
-            <nav class="col-lg-2 col-md-3 d-none d-md-block admin-sidebar py-3">
+            <nav class="col-lg-2 col-md-3 admin-sidebar py-3">
                 <div class="position-sticky" style="top: 80px;">
                     <div class="px-3 mb-3 text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--color-primary);">
                         Menu Pengelola

@@ -148,6 +148,20 @@ document.addEventListener('DOMContentLoaded', function () {
     initFadeSlideshow('heroSlideshow', '.hero-slide');
     initFadeSlideshow('galSlideshow', '.ed-gal-slide');
 
+    // Fallback foto slide: bila berkas hero/galeri gagal dimuat (404/jaring putus),
+    // ganti dengan foto bawaan agar tidak tampil latar biru polos.
+    document.querySelectorAll('.hero-slide, .ed-gal-slide').forEach(function (slide) {
+        const bg = slide.style.backgroundImage || '';
+        const m = /url\(["']?(.*?)["']?\)/.exec(bg);
+        if (!m || !m[1]) return;
+        const probe = new Image();
+        probe.onerror = function () {
+            const fb = m[1].replace(/uploads\/.*$/i, 'assets/img/ternate-city.jpg');
+            if (fb !== m[1]) slide.style.backgroundImage = 'url("' + fb + '")';
+        };
+        probe.src = m[1];
+    });
+
     // Tab jenjang kelas di beranda (semua panel tetap terlihat tanpa JS)
     const tabButtons = document.querySelectorAll('.ed-tab[data-tab]');
     if (tabButtons.length) {

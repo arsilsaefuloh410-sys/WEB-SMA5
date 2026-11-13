@@ -140,8 +140,8 @@ require_once __DIR__ . '/../includes/header.php';
 
             <!-- 2. Berkas Bahan Ajar (Slide PPT & Modul PDF) -->
             <div class="card card-modern p-4 mb-4 bg-white" style="border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--border-subtle) !important;">
-                    <div class="d-flex align-items-center gap-2">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom sec-head" style="border-color: var(--border-subtle) !important;">
+                    <div class="d-flex align-items-center gap-2 sec-head-main">
                         <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(234, 88, 12, 0.1); color: #ea580c;">
                             <i class="bi bi-cloud-arrow-down fs-5"></i>
                         </div>
@@ -206,8 +206,8 @@ require_once __DIR__ . '/../includes/header.php';
 
             <!-- 3. Tautan Belajar & Referensi Eksternal -->
             <div class="card card-modern p-4 mb-4 bg-white" style="border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--border-subtle) !important;">
-                    <div class="d-flex align-items-center gap-2">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom sec-head" style="border-color: var(--border-subtle) !important;">
+                    <div class="d-flex align-items-center gap-2 sec-head-main">
                         <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--color-ice); color: var(--color-primary);">
                             <i class="bi bi-globe2 fs-5"></i>
                         </div>
