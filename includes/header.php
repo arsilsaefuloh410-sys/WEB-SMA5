@@ -75,16 +75,6 @@ function render_nav_menu(string $suffix): void
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        (function () {
-            var W = 1200;
-            var w = window.innerWidth || document.documentElement.clientWidth;
-            var s = w > 0 ? w / W : 0;
-            if (s > 0 && s < 1) {
-                document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=' + W + ', initial-scale=' + Math.round(s * 10000) / 10000);
-            }
-        })();
-    </script>
     <title><?= e($page_title) ?></title>
     
     <!-- Meta SEO Ramah Pendidik -->
@@ -177,7 +167,8 @@ function render_nav_menu(string $suffix): void
                     <img src="<?= base_url('assets/img/logo-sman5.png') ?>" alt="Logo SMAN 5" style="width:100%;height:100%;object-fit:contain;">
                 </div>
                 <div class="d-flex flex-column lh-1 min-width-0">
-                    <span class="fs-6 fw-bold text-dark text-nowrap" style="font-size: 0.95rem;">Portal Bahan Ajar Informatika</span>
+                    <span class="fs-6 fw-bold text-dark text-nowrap nav-title-long" style="font-size: 0.95rem;">Portal Bahan Ajar Informatika</span>
+                    <span class="fs-6 fw-bold text-dark text-nowrap nav-title-short" style="font-size: 0.95rem;">Portal Informatika</span>
                     <small class="fw-semibold text-nowrap mt-1 d-none d-sm-block" style="font-size: 0.8125rem; color: var(--color-primary);">
                         <i class="bi bi-geo-alt-fill me-1" style="color: var(--color-accent);"></i>SMAN 5 Kota Ternate
                     </small>

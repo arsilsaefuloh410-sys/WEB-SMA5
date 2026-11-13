@@ -18,16 +18,6 @@ $current_user = current_user();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        (function () {
-            var W = 1200;
-            var w = window.innerWidth || document.documentElement.clientWidth;
-            var s = w > 0 ? w / W : 0;
-            if (s > 0 && s < 1) {
-                document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=' + W + ', initial-scale=' + Math.round(s * 10000) / 10000);
-            }
-        })();
-    </script>
     <title><?= e($page_title) ?></title>
 
     <!-- Favicon Inline (menghindari request /favicon.ico 404) -->

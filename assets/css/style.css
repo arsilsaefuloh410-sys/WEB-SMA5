@@ -422,6 +422,8 @@ body:not(.has-sidebar) .app-main-wrap {
     font-size: 1.3rem;
 }
 
+.navbar-brand-main > div.d-flex.flex-column > .nav-title-short { display: none; }
+
 .navbar-nav {
     display: flex;
     align-items: center;
@@ -1886,7 +1888,7 @@ body.landing .app-content > .container {
 
     .navbar-brand-main {
         min-width: 0;
-        flex: 1 1 auto;
+        flex: 1 1 0;
         overflow: hidden;
         gap: 0.5rem !important;
     }
@@ -1905,7 +1907,7 @@ body.landing .app-content > .container {
     .nav-icon-btn { width: 36px; height: 36px; font-size: 1.15rem; }
 
     .nav-actions {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: flex-end;
         gap: 0.35rem !important;
         min-width: 0;
@@ -1943,6 +1945,7 @@ body.landing .app-content > .container {
     .ed-accent { width: min(260px, 60%); }
 
     /* Fitur: judul jadi pita lengket di atas */
+    .ed-features { margin-top: 2.5rem; }
     .ed-feat-inner { grid-template-columns: 1fr; gap: 2rem; }
 
     .ed-feat-heading {
@@ -1956,7 +1959,7 @@ body.landing .app-content > .container {
         margin: 0;
     }
 
-    .ed-feat-rows { gap: 4.5rem; }
+    .ed-feat-rows { gap: 3.25rem; }
 
     .ed-feat-row,
     .ed-feat-row-flip { flex-direction: column; }
@@ -2023,11 +2026,16 @@ body.landing .app-content > .container {
     .navbar-custom { padding: 0.5rem 0.65rem; }
 
     .nav-actions {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: flex-end;
         gap: 0.35rem !important;
         min-width: 0;
     }
+
+    .navbar-brand-main > div.d-flex.flex-column > span { font-size: 0.85rem !important; }
+    .nav-title-long { display: none !important; }
+    .nav-title-short { display: block !important; }
+    .nav-actions .dropdown .dropdown-toggle::after { display: none; }
 
     .nav-actions .dropdown .btn {
         padding: 0.25rem 0.5rem !important;
